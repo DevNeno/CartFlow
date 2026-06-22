@@ -18,13 +18,12 @@ public class Cart {
     private Long id;
     private CartStatus status;
 
-    @ManyToMany
-    @JoinTable(
-            name = "cart_product",
-            joinColumns = @JoinColumn(name = "IdCart"),
-            inverseJoinColumns = @JoinColumn(name = "IdProduct")
-    )
-    private List<Product> products = new ArrayList<>();
+    @OneToMany(mappedBy = "cart")
+    private List<CartProductQuantity> products = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name="user_cart")
+    private User user;
 
     public  Cart(CartStatus status) {
         this.status = status;

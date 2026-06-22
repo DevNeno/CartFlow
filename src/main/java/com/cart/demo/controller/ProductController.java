@@ -1,8 +1,9 @@
 package com.cart.demo.controller;
 
 
-import com.cart.demo.dto.product.ProductRequest;
 import com.cart.demo.dto.product.ProductResponse;
+import com.cart.demo.dto.product.ProductSaveRequest;
+import com.cart.demo.dto.product.ProductUpdateRequest;
 import com.cart.demo.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,12 +32,12 @@ public class ProductController {
 
     // Save
     @PostMapping
-    public ResponseEntity<ProductResponse> save(@Valid @RequestBody ProductRequest request){
-        return new ResponseEntity<>(productService.save(request), HttpStatus.OK);
+    public ResponseEntity<ProductResponse> save(@Valid @RequestBody ProductSaveRequest request){
+        return new ResponseEntity<>(productService.save(request), HttpStatus.CREATED);
     }
     // Update
     @PutMapping("/{id}")
-    public ResponseEntity<ProductResponse> update(@PathVariable Long id, @Valid @RequestBody ProductRequest request){
+    public ResponseEntity<ProductResponse> update(@PathVariable Long id, @Valid @RequestBody ProductUpdateRequest request){
         return new ResponseEntity<>(productService.update(id, request), HttpStatus.OK);
     }
 

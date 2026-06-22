@@ -1,7 +1,8 @@
 package com.cart.demo.service.impl;
 
-import com.cart.demo.dto.product.ProductRequest;
 import com.cart.demo.dto.product.ProductResponse;
+import com.cart.demo.dto.product.ProductSaveRequest;
+import com.cart.demo.dto.product.ProductUpdateRequest;
 import com.cart.demo.model.entity.Product;
 import com.cart.demo.repository.ProductRepository;
 import com.cart.demo.service.ProductService;
@@ -56,7 +57,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponse save(ProductRequest request) {
+    public ProductResponse save(ProductSaveRequest request) {
         Product product = new Product(
                 request.name(),
                 request.description(),
@@ -76,18 +77,18 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponse update(Long id, ProductRequest request) {
+    public ProductResponse update(Long id, ProductUpdateRequest request) {
         Product product = productRepository.findById(id).orElse(null);
         if (product == null) {
             throw new ResourceNotFoundException("Product not found");
         }
-        if (request.name() != null && request.name().trim() != "") {
+        if (request.name() != null && !request.name().trim().isEmpty()) {
             product.setName(request.name());
         }
-        if (request.description() != null && request.description().trim() != "") {
+        if (request.description() != null && !request.description().trim().isEmpty()) {
             product.setDescription(request.description());
         }
-        if (/*request.price() != null &&*/ request.price() > 0){
+        if (request.price() > 0){
             product.setPrice(request.price());
         }
         if ( request.category() != null){
@@ -96,11 +97,11 @@ public class ProductServiceImpl implements ProductService {
 
         Product productUpdated = productRepository.save(product);
         return new ProductResponse(
-                product.getId(),
-                product.getName(),
-                product.getDescription(),
-                product.getPrice(),
-                product.getCategory()
+                productUpdated.getId(),
+                productUpdated.getName(),
+                productUpdated.getDescription(),
+                productUpdated.getPrice(),
+                productUpdated.getCategory()
         );
     }
 

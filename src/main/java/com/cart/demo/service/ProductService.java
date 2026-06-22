@@ -1,17 +1,15 @@
 package com.cart.demo.service;
 
-import com.cart.demo.dto.product.ProductRequest;
 import com.cart.demo.dto.product.ProductResponse;
+import com.cart.demo.dto.product.ProductSaveRequest;
+import com.cart.demo.dto.product.ProductUpdateRequest;
 
 import java.util.List;
 
-
 public interface ProductService {
-
-    public List<ProductResponse>  findAll();
-    public ProductResponse findById(Long id);
-    public ProductResponse save(ProductRequest productRequest);
-    public ProductResponse update(Long id, ProductRequest productRequest);
-    public void deleteById(Long id);
-
+    List<ProductResponse>  findAll();
+    ProductResponse findById(Long id);
+    ProductResponse save(ProductSaveRequest request);
+    ProductResponse update(Long id, ProductUpdateRequest request);
+    void deleteById(Long id);
 }

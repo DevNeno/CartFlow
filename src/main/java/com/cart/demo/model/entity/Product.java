@@ -25,8 +25,8 @@ public class Product {
     @ManyToMany(mappedBy = "products")
     private List<PurchaseOrder> purchaseOrders = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "products")
-    private List<Cart> carts = new ArrayList<>();
+    @OneToMany(mappedBy = "product")
+    private List<CartProductQuantity> cartsProductQuantity = new ArrayList<>();
 
     public Product(String name, String description, float price, Category category) {
         this.name = name;
@@ -36,16 +36,16 @@ public class Product {
     }
 
     // Setters
-    public void setName(String name) {
+    void setName(String name) {
         this.name = name;
     }
-    public void setDescription(String description) {
+    void setDescription(String description) {
         this.description = description;
     }
-    public void setPrice(float price) {
+    void setPrice(float price) {
         this.price = price;
     }
-    public void setCategory(Category category) {
+    void setCategory(Category category) {
         this.category = category;
     }
 }
