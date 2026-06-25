@@ -4,6 +4,7 @@ import com.cart.demo.model.enumeration.Category;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,9 +17,14 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    @Setter
     private String name;
+    @Setter
     private String description;
+    @Setter
     private float price;
+
+    @Setter
     @Enumerated(EnumType.STRING)
     private Category category;
 
@@ -32,20 +38,6 @@ public class Product {
         this.name = name;
         this.description = description;
         this.price = price;
-        this.category = category;
-    }
-
-    // Setters
-    void setName(String name) {
-        this.name = name;
-    }
-    void setDescription(String description) {
-        this.description = description;
-    }
-    void setPrice(float price) {
-        this.price = price;
-    }
-    void setCategory(Category category) {
         this.category = category;
     }
 }

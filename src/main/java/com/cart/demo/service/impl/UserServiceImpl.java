@@ -4,8 +4,10 @@ import com.cart.demo.dto.user.UserInfoResponse;
 import com.cart.demo.dto.user.UserResponse;
 import com.cart.demo.dto.user.UserSaveRequest;
 import com.cart.demo.dto.user.UserUpdateRequest;
+import com.cart.demo.model.entity.Cart;
 import com.cart.demo.model.entity.User;
 import com.cart.demo.model.entity.UserInfo;
+import com.cart.demo.repository.CartRepository;
 import com.cart.demo.repository.UserRepository;
 import com.cart.demo.service.UserService;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -14,13 +16,17 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.cart.demo.model.enumeration.CartStatus.ACTIVE;
+
 @Service
 public class UserServiceImpl  implements UserService {
 
     private final UserRepository userRepository;
+    private final CartRepository cartRepository;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, CartRepository cartRepository) {
         this.userRepository = userRepository;
+        this.cartRepository = cartRepository;
     }
 
     @Override
@@ -86,12 +92,16 @@ public class UserServiceImpl  implements UserService {
                 savedUser.getUserInfo().getCity(),
                 savedUser.getUserInfo().getCountry()
         );
+
+        // Create user cart
+        Cart cart = new Cart(ACTIVE, savedUser);
+        cartRepository.save(cart);
+
         return new UserResponse(
                 savedUser.getId(),
                 savedUser.getUsername(),
                 userInfoResponse
         );
-
     }
 
     @Override

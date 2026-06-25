@@ -2,11 +2,13 @@ package com.cart.demo.model.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "cartProductQuantity")
 
+@NoArgsConstructor
 @Getter
 public class CartProductQuantity {
     @Id

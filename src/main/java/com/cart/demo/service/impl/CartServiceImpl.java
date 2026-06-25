@@ -1,27 +1,32 @@
 package com.cart.demo.service.impl;
 
 import com.cart.demo.dto.cart.CartProductRequest;
-import com.cart.demo.dto.cart.CartProductResponse;
+import com.cart.demo.dto.product.ProductQuantityResponse;
 import com.cart.demo.dto.cart.CartResponse;
 import com.cart.demo.model.entity.Cart;
 import com.cart.demo.model.entity.CartProductQuantity;
 import com.cart.demo.model.entity.Product;
+import com.cart.demo.repository.CartProductQuantityRepository;
 import com.cart.demo.repository.CartRepository;
 import com.cart.demo.repository.ProductRepository;
 import com.cart.demo.service.CartService;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
 public class CartServiceImpl implements CartService {
 
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
+    private final CartProductQuantityRepository  cartProductQuantityRepository;
 
-    public CartServiceImpl(CartRepository cartRepository, ProductRepository productRepository) {
+    public CartServiceImpl(CartRepository cartRepository, ProductRepository productRepository,  CartProductQuantityRepository cartProductQuantityRepository) {
         this.cartRepository = cartRepository;
         this.productRepository = productRepository;
+        this.cartProductQuantityRepository = cartProductQuantityRepository;
     }
 
     @Override
@@ -31,16 +36,16 @@ public class CartServiceImpl implements CartService {
             throw new ResourceNotFoundException("Cart not found");
         }
 
-        List<CartProductResponse> productResponseList = new ArrayList<>();
+        List<ProductQuantityResponse> productResponseList = new ArrayList<>();
         float totalPrice = 0;
         for (CartProductQuantity productQuantity : cart.getProducts()) {
 
-            CartProductResponse cartProductResponse = new CartProductResponse(
+            ProductQuantityResponse productQuantityResponse = new ProductQuantityResponse(
                     productQuantity.getProduct().getName(),
                     productQuantity.getProduct().getPrice(),
                     productQuantity.getQuantity()
             );
-            productResponseList.add(cartProductResponse);
+            productResponseList.add(productQuantityResponse);
             totalPrice = totalPrice + productQuantity.getQuantity() * productQuantity.getProduct().getPrice();
         }
        return new CartResponse(cart.getStatus(), productResponseList, totalPrice);
@@ -59,19 +64,20 @@ public class CartServiceImpl implements CartService {
         }
 
         CartProductQuantity productQuantity = new CartProductQuantity(cart, product, request.quantity());
-        cart.getProducts().add(productQuantity);
+        CartProductQuantity savedProductQuantity = cartProductQuantityRepository.save(productQuantity);
+        cart.getProducts().add(savedProductQuantity);
         cartRepository.save(cart);
 
-        List<CartProductResponse> productResponseList = new ArrayList<>();
+        List<ProductQuantityResponse> productResponseList = new ArrayList<>();
         float totalPrice = 0;
         for (CartProductQuantity cartProductQuantity : cart.getProducts()) {
 
-            CartProductResponse cartProductResponse = new CartProductResponse(
+            ProductQuantityResponse productQuantityResponse = new ProductQuantityResponse(
                     cartProductQuantity.getProduct().getName(),
                     cartProductQuantity.getProduct().getPrice(),
                     cartProductQuantity.getQuantity()
             );
-            productResponseList.add(cartProductResponse);
+            productResponseList.add(productQuantityResponse);
             totalPrice = totalPrice + cartProductQuantity.getQuantity() * cartProductQuantity.getProduct().getPrice();
         }
         return new CartResponse(cart.getStatus(), productResponseList, totalPrice);
@@ -84,20 +90,21 @@ public class CartServiceImpl implements CartService {
             throw new ResourceNotFoundException("Cart not found");
         }
 
-        List<CartProductResponse> productResponseList = new ArrayList<>();
+        List<ProductQuantityResponse> productResponseList = new ArrayList<>();
         float totalPrice = 0;
         for (CartProductQuantity cartProductQuantity : cart.getProducts()) {
 
             if (request.productId().equals(cartProductQuantity.getProduct().getId())) {
                 cartProductQuantity.setQuantity(request.quantity());
+                cartProductQuantityRepository.save(cartProductQuantity);
             }
 
-            CartProductResponse cartProductResponse = new CartProductResponse(
+            ProductQuantityResponse productQuantityResponse = new ProductQuantityResponse(
                     cartProductQuantity.getProduct().getName(),
                     cartProductQuantity.getProduct().getPrice(),
                     cartProductQuantity.getQuantity()
             );
-            productResponseList.add(cartProductResponse);
+            productResponseList.add(productQuantityResponse);
             totalPrice = totalPrice + cartProductQuantity.getQuantity() * cartProductQuantity.getProduct().getPrice();
         }
         // Save change
@@ -119,6 +126,7 @@ public class CartServiceImpl implements CartService {
             count++;
             if (cartProductQuantity.getProduct().getId().equals(productId)) {
                 cart.getProducts().remove(cartProductQuantity);
+                cartProductQuantityRepository.deleteById(productId);
                 break;
             }
             if (count == listSize){
@@ -127,15 +135,15 @@ public class CartServiceImpl implements CartService {
         }
         cartRepository.save(cart);
 
-        List<CartProductResponse> productResponseList = new ArrayList<>();
+        List<ProductQuantityResponse> productResponseList = new ArrayList<>();
         float totalPrice = 0;
         for (CartProductQuantity cartProductQuantity : cart.getProducts()) {
-            CartProductResponse cartProductResponse = new CartProductResponse(
+            ProductQuantityResponse productQuantityResponse = new ProductQuantityResponse(
                     cartProductQuantity.getProduct().getName(),
                     cartProductQuantity.getProduct().getPrice(),
                     cartProductQuantity.getQuantity()
             );
-            productResponseList.add(cartProductResponse);
+            productResponseList.add(productQuantityResponse);
             totalPrice = totalPrice + cartProductQuantity.getQuantity() * cartProductQuantity.getProduct().getPrice();
         }
         return new CartResponse(cart.getStatus(), productResponseList, totalPrice);

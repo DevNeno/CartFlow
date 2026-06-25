@@ -25,7 +25,8 @@ public class Cart {
     @JoinColumn(name="user_cart")
     private User user;
 
-    public  Cart(CartStatus status) {
+    public  Cart(CartStatus status, User user) {
         this.status = status;
+        this.user = user;
     }
 }
