@@ -10,6 +10,7 @@ import com.cart.demo.model.entity.UserInfo;
 import com.cart.demo.repository.CartRepository;
 import com.cart.demo.repository.UserRepository;
 import com.cart.demo.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -21,13 +22,11 @@ import static com.cart.demo.model.enumeration.CartStatus.ACTIVE;
 @Service
 public class UserServiceImpl  implements UserService {
 
-    private final UserRepository userRepository;
-    private final CartRepository cartRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-    public UserServiceImpl(UserRepository userRepository, CartRepository cartRepository) {
-        this.userRepository = userRepository;
-        this.cartRepository = cartRepository;
-    }
+    @Autowired
+    private CartRepository cartRepository;
 
     @Override
     public List<UserResponse> findAll() {

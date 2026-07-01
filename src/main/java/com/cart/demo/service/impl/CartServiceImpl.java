@@ -1,17 +1,20 @@
 package com.cart.demo.service.impl;
 
 import com.cart.demo.dto.cart.CartProductRequest;
-import com.cart.demo.dto.product.ProductQuantityResponse;
+import com.cart.demo.dto.cart.CartProductQuantityResponse;
 import com.cart.demo.dto.cart.CartResponse;
 import com.cart.demo.model.entity.Cart;
 import com.cart.demo.model.entity.CartProductQuantity;
 import com.cart.demo.model.entity.Product;
+import com.cart.demo.model.enumeration.CartStatus;
 import com.cart.demo.repository.CartProductQuantityRepository;
 import com.cart.demo.repository.CartRepository;
 import com.cart.demo.repository.ProductRepository;
 import com.cart.demo.service.CartService;
+import org.apache.coyote.BadRequestException;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +24,7 @@ public class CartServiceImpl implements CartService {
 
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
-    private final CartProductQuantityRepository  cartProductQuantityRepository;
+    private final CartProductQuantityRepository cartProductQuantityRepository;
 
     public CartServiceImpl(CartRepository cartRepository, ProductRepository productRepository,  CartProductQuantityRepository cartProductQuantityRepository) {
         this.cartRepository = cartRepository;
@@ -36,17 +39,17 @@ public class CartServiceImpl implements CartService {
             throw new ResourceNotFoundException("Cart not found");
         }
 
-        List<ProductQuantityResponse> productResponseList = new ArrayList<>();
+        List<CartProductQuantityResponse> productResponseList = new ArrayList<>();
         float totalPrice = 0;
-        for (CartProductQuantity productQuantity : cart.getProducts()) {
+        for (CartProductQuantity cartProductQuantity : cart.getProducts()) {
 
-            ProductQuantityResponse productQuantityResponse = new ProductQuantityResponse(
-                    productQuantity.getProduct().getName(),
-                    productQuantity.getProduct().getPrice(),
-                    productQuantity.getQuantity()
+            CartProductQuantityResponse cartProductQuantityResponse = new CartProductQuantityResponse(
+                    cartProductQuantity.getProduct().getName(),
+                    cartProductQuantity.getProduct().getPrice(),
+                    cartProductQuantity.getQuantity()
             );
-            productResponseList.add(productQuantityResponse);
-            totalPrice = totalPrice + productQuantity.getQuantity() * productQuantity.getProduct().getPrice();
+            productResponseList.add(cartProductQuantityResponse);
+            totalPrice = totalPrice + cartProductQuantity.getQuantity() * cartProductQuantity.getProduct().getPrice();
         }
        return new CartResponse(cart.getStatus(), productResponseList, totalPrice);
     }
@@ -58,26 +61,30 @@ public class CartServiceImpl implements CartService {
             throw new ResourceNotFoundException("Cart not found");
         }
 
+        if (cart.getStatus().equals(CartStatus.ARCHIEVED) || cart.getStatus().equals(CartStatus.ABANDONED)){
+            throw new IllegalStateException("Cannot delete product");
+        }
+
         Product product = productRepository.findById(request.productId()).orElse(null);
         if (product == null) {
             throw new ResourceNotFoundException("Product not found");
         }
 
         CartProductQuantity productQuantity = new CartProductQuantity(cart, product, request.quantity());
-        CartProductQuantity savedProductQuantity = cartProductQuantityRepository.save(productQuantity);
-        cart.getProducts().add(savedProductQuantity);
+        CartProductQuantity savedCartProductQuantity = cartProductQuantityRepository.save(productQuantity);
+        cart.getProducts().add(savedCartProductQuantity);
         cartRepository.save(cart);
 
-        List<ProductQuantityResponse> productResponseList = new ArrayList<>();
+        List<CartProductQuantityResponse> productResponseList = new ArrayList<>();
         float totalPrice = 0;
         for (CartProductQuantity cartProductQuantity : cart.getProducts()) {
 
-            ProductQuantityResponse productQuantityResponse = new ProductQuantityResponse(
+            CartProductQuantityResponse cartProductQuantityResponse = new CartProductQuantityResponse(
                     cartProductQuantity.getProduct().getName(),
                     cartProductQuantity.getProduct().getPrice(),
                     cartProductQuantity.getQuantity()
             );
-            productResponseList.add(productQuantityResponse);
+            productResponseList.add(cartProductQuantityResponse);
             totalPrice = totalPrice + cartProductQuantity.getQuantity() * cartProductQuantity.getProduct().getPrice();
         }
         return new CartResponse(cart.getStatus(), productResponseList, totalPrice);
@@ -90,7 +97,11 @@ public class CartServiceImpl implements CartService {
             throw new ResourceNotFoundException("Cart not found");
         }
 
-        List<ProductQuantityResponse> productResponseList = new ArrayList<>();
+        if (cart.getStatus().equals(CartStatus.ARCHIEVED) || cart.getStatus().equals(CartStatus.ABANDONED)){
+            throw new IllegalStateException("Cannot delete product");
+        }
+
+        List<CartProductQuantityResponse> productResponseList = new ArrayList<>();
         float totalPrice = 0;
         for (CartProductQuantity cartProductQuantity : cart.getProducts()) {
 
@@ -99,12 +110,12 @@ public class CartServiceImpl implements CartService {
                 cartProductQuantityRepository.save(cartProductQuantity);
             }
 
-            ProductQuantityResponse productQuantityResponse = new ProductQuantityResponse(
+            CartProductQuantityResponse cartProductQuantityResponse = new CartProductQuantityResponse(
                     cartProductQuantity.getProduct().getName(),
                     cartProductQuantity.getProduct().getPrice(),
                     cartProductQuantity.getQuantity()
             );
-            productResponseList.add(productQuantityResponse);
+            productResponseList.add(cartProductQuantityResponse);
             totalPrice = totalPrice + cartProductQuantity.getQuantity() * cartProductQuantity.getProduct().getPrice();
         }
         // Save change
@@ -118,6 +129,10 @@ public class CartServiceImpl implements CartService {
         Cart cart = cartRepository.findById(id).orElse(null);
         if (cart == null) {
             throw new ResourceNotFoundException("Cart not found");
+        }
+
+        if (cart.getStatus().equals(CartStatus.ARCHIEVED) || cart.getStatus().equals(CartStatus.ABANDONED)){
+            throw new IllegalStateException("Cannot delete product");
         }
 
         int listSize =  cart.getProducts().size();
@@ -135,20 +150,19 @@ public class CartServiceImpl implements CartService {
         }
         cartRepository.save(cart);
 
-        List<ProductQuantityResponse> productResponseList = new ArrayList<>();
+        List<CartProductQuantityResponse> productResponseList = new ArrayList<>();
         float totalPrice = 0;
         for (CartProductQuantity cartProductQuantity : cart.getProducts()) {
-            ProductQuantityResponse productQuantityResponse = new ProductQuantityResponse(
+            CartProductQuantityResponse cartProductQuantityResponse = new CartProductQuantityResponse(
                     cartProductQuantity.getProduct().getName(),
                     cartProductQuantity.getProduct().getPrice(),
                     cartProductQuantity.getQuantity()
             );
-            productResponseList.add(productQuantityResponse);
+            productResponseList.add(cartProductQuantityResponse);
             totalPrice = totalPrice + cartProductQuantity.getQuantity() * cartProductQuantity.getProduct().getPrice();
         }
         return new CartResponse(cart.getStatus(), productResponseList, totalPrice);
     }
-
 
     @Override
     public void delete(Long id) {
@@ -158,4 +172,5 @@ public class CartServiceImpl implements CartService {
         }
         cartRepository.delete(cart);
     }
+
 }

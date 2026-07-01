@@ -4,6 +4,7 @@ import com.cart.demo.model.enumeration.CartStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,8 @@ public class Cart {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
+    @Setter
     private CartStatus status;
 
     @OneToMany(mappedBy = "cart")

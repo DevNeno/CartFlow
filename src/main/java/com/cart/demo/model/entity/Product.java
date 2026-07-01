@@ -28,11 +28,11 @@ public class Product {
     @Enumerated(EnumType.STRING)
     private Category category;
 
-    @ManyToMany(mappedBy = "products")
-    private List<PurchaseOrder> purchaseOrders = new ArrayList<>();
+    @OneToMany(mappedBy = "product")
+    private List<PurchaseProductQuantity> purchaseProductQuantity = new ArrayList<>();
 
     @OneToMany(mappedBy = "product")
-    private List<CartProductQuantity> cartsProductQuantity = new ArrayList<>();
+    private List<CartProductQuantity> cartsCartProductQuantity = new ArrayList<>();
 
     public Product(String name, String description, float price, Category category) {
         this.name = name;

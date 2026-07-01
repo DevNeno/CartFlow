@@ -4,7 +4,9 @@ package com.cart.demo.model.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -15,14 +17,20 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    @Setter
     private String username;
+    @Setter
     private String password;
+    @Setter
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "IdUserInfo")
     private UserInfo userInfo;
 
     @OneToMany(mappedBy = "user")
-    private List<Cart> carts;
+    private List<Cart> carts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user")
+    private List<PurchaseOrder> purchaseOrders = new ArrayList<>();
 
     public User(String username, String password, UserInfo userInfo) {
         this.username = username;
@@ -30,14 +38,4 @@ public class User {
         this.userInfo = userInfo;
     }
 
-    // Setters
-    public void setUsername(String username){
-        this.username = username;
-    }
-    public void setPassword(String password){
-        this.password = password;
-    }
-    public void setUserInfo(UserInfo userInfo){
-        this.userInfo = userInfo;
-    }
 }
