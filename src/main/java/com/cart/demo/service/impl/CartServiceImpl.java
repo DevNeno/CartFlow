@@ -3,6 +3,7 @@ package com.cart.demo.service.impl;
 import com.cart.demo.dto.cart.CartProductRequest;
 import com.cart.demo.dto.cart.CartProductQuantityResponse;
 import com.cart.demo.dto.cart.CartResponse;
+import com.cart.demo.exception.CartAlreadyClosedException;
 import com.cart.demo.model.entity.Cart;
 import com.cart.demo.model.entity.CartProductQuantity;
 import com.cart.demo.model.entity.Product;
@@ -11,10 +12,8 @@ import com.cart.demo.repository.CartProductQuantityRepository;
 import com.cart.demo.repository.CartRepository;
 import com.cart.demo.repository.ProductRepository;
 import com.cart.demo.service.CartService;
-import org.apache.coyote.BadRequestException;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +61,7 @@ public class CartServiceImpl implements CartService {
         }
 
         if (cart.getStatus().equals(CartStatus.ARCHIEVED) || cart.getStatus().equals(CartStatus.ABANDONED)){
-            throw new IllegalStateException("Cannot delete product");
+            throw new CartAlreadyClosedException();
         }
 
         Product product = productRepository.findById(request.productId()).orElse(null);
@@ -98,7 +97,7 @@ public class CartServiceImpl implements CartService {
         }
 
         if (cart.getStatus().equals(CartStatus.ARCHIEVED) || cart.getStatus().equals(CartStatus.ABANDONED)){
-            throw new IllegalStateException("Cannot delete product");
+            throw new CartAlreadyClosedException();
         }
 
         List<CartProductQuantityResponse> productResponseList = new ArrayList<>();
@@ -132,7 +131,7 @@ public class CartServiceImpl implements CartService {
         }
 
         if (cart.getStatus().equals(CartStatus.ARCHIEVED) || cart.getStatus().equals(CartStatus.ABANDONED)){
-            throw new IllegalStateException("Cannot delete product");
+            throw new CartAlreadyClosedException();
         }
 
         int listSize =  cart.getProducts().size();

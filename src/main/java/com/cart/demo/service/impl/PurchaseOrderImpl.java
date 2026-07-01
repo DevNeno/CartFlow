@@ -10,8 +10,8 @@ import com.cart.demo.repository.CartRepository;
 import com.cart.demo.repository.PurchaseOrderProductRepository;
 import com.cart.demo.repository.PurchaseOrderRepository;
 import com.cart.demo.service.PurchaseOrderService;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -21,6 +21,7 @@ import static com.cart.demo.model.enumeration.CartStatus.ARCHIEVED;
 
 @Service
 public class PurchaseOrderImpl implements PurchaseOrderService {
+
 
     @Autowired
     private PurchaseOrderRepository purchaseOrderRepository;
@@ -35,7 +36,7 @@ public class PurchaseOrderImpl implements PurchaseOrderService {
     public PurchaseOrderResponse findById(Long id) {
         PurchaseOrder purchaseOrder =  purchaseOrderRepository.findById(id).orElse(null);
         if (purchaseOrder == null) {
-            throw new EntityNotFoundException("Purchase Order Not Found");
+            throw new ResourceNotFoundException("Purchase Order Not Found");
         }
 
         List<PurchaseOrderProductResponse> products = new ArrayList<>();
@@ -54,7 +55,7 @@ public class PurchaseOrderImpl implements PurchaseOrderService {
     public PurchaseOrderResponse purchase(Long cartId) {
         Cart cart =  cartRepository.findById(cartId).orElse(null);
         if (cart == null) {
-            throw new EntityNotFoundException("Cart Not Found");
+            throw new ResourceNotFoundException("Cart Not Found");
         }
         PurchaseOrder purchase = purchaseOrderRepository.save(new PurchaseOrder());
 
