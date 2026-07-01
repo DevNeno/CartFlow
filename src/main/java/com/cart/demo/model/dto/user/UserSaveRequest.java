@@ -1,4 +1,4 @@
-package com.cart.demo.dto.user;
+package com.cart.demo.model.dto.user;
 
 import jakarta.validation.constraints.NotBlank;
 

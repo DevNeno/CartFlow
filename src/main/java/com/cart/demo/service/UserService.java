@@ -1,8 +1,8 @@
 package com.cart.demo.service;
 
-import com.cart.demo.dto.user.UserResponse;
-import com.cart.demo.dto.user.UserSaveRequest;
-import com.cart.demo.dto.user.UserUpdateRequest;
+import com.cart.demo.model.dto.user.UserResponse;
+import com.cart.demo.model.dto.user.UserSaveRequest;
+import com.cart.demo.model.dto.user.UserUpdateRequest;
 
 import java.util.List;
 

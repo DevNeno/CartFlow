@@ -1,8 +1,8 @@
 package com.cart.demo.service.impl;
 
-import com.cart.demo.dto.cart.CartProductRequest;
-import com.cart.demo.dto.cart.CartProductQuantityResponse;
-import com.cart.demo.dto.cart.CartResponse;
+import com.cart.demo.model.dto.cart.CartProductRequest;
+import com.cart.demo.model.dto.cart.CartProductQuantityResponse;
+import com.cart.demo.model.dto.cart.CartResponse;
 import com.cart.demo.exception.CartAlreadyClosedException;
 import com.cart.demo.model.entity.Cart;
 import com.cart.demo.model.entity.CartProductQuantity;

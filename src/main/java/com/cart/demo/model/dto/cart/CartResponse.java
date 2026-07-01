@@ -1,4 +1,4 @@
-package com.cart.demo.dto.cart;
+package com.cart.demo.model.dto.cart;
 
 import com.cart.demo.model.enumeration.CartStatus;
 

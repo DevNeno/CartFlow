@@ -1,8 +1,8 @@
 package com.cart.demo.service;
 
-import com.cart.demo.dto.product.ProductResponse;
-import com.cart.demo.dto.product.ProductSaveRequest;
-import com.cart.demo.dto.product.ProductUpdateRequest;
+import com.cart.demo.model.dto.product.ProductResponse;
+import com.cart.demo.model.dto.product.ProductSaveRequest;
+import com.cart.demo.model.dto.product.ProductUpdateRequest;
 
 import java.util.List;
 

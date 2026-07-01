@@ -1,7 +1,7 @@
 package com.cart.demo.service;
 
-import com.cart.demo.dto.cart.CartProductRequest;
-import com.cart.demo.dto.cart.CartResponse;
+import com.cart.demo.model.dto.cart.CartProductRequest;
+import com.cart.demo.model.dto.cart.CartResponse;
 
 public interface CartService {
     CartResponse findById(Long id);

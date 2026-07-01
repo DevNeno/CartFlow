@@ -1,4 +1,4 @@
-package com.cart.demo.dto.user;
+package com.cart.demo.model.dto.user;
 
 public record UserUpdateRequest(
         String username,  String password,

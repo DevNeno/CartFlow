@@ -1,7 +1,7 @@
 package com.cart.demo.service.impl;
 
-import com.cart.demo.dto.purchase.PurchaseOrderProductResponse;
-import com.cart.demo.dto.purchase.PurchaseOrderResponse;
+import com.cart.demo.model.dto.purchase.PurchaseOrderProductResponse;
+import com.cart.demo.model.dto.purchase.PurchaseOrderResponse;
 import com.cart.demo.model.entity.Cart;
 import com.cart.demo.model.entity.CartProductQuantity;
 import com.cart.demo.model.entity.PurchaseOrder;

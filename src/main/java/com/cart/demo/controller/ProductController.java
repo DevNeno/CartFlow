@@ -1,9 +1,9 @@
 package com.cart.demo.controller;
 
 
-import com.cart.demo.dto.product.ProductResponse;
-import com.cart.demo.dto.product.ProductSaveRequest;
-import com.cart.demo.dto.product.ProductUpdateRequest;
+import com.cart.demo.model.dto.product.ProductResponse;
+import com.cart.demo.model.dto.product.ProductSaveRequest;
+import com.cart.demo.model.dto.product.ProductUpdateRequest;
 import com.cart.demo.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,8 +1,8 @@
 package com.cart.demo.service.impl;
 
-import com.cart.demo.dto.product.ProductResponse;
-import com.cart.demo.dto.product.ProductSaveRequest;
-import com.cart.demo.dto.product.ProductUpdateRequest;
+import com.cart.demo.model.dto.product.ProductResponse;
+import com.cart.demo.model.dto.product.ProductSaveRequest;
+import com.cart.demo.model.dto.product.ProductUpdateRequest;
 import com.cart.demo.model.entity.Product;
 import com.cart.demo.repository.ProductRepository;
 import com.cart.demo.service.ProductService;

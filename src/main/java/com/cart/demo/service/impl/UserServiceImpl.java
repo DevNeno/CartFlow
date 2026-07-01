@@ -1,9 +1,9 @@
 package com.cart.demo.service.impl;
 
-import com.cart.demo.dto.user.UserInfoResponse;
-import com.cart.demo.dto.user.UserResponse;
-import com.cart.demo.dto.user.UserSaveRequest;
-import com.cart.demo.dto.user.UserUpdateRequest;
+import com.cart.demo.model.dto.user.UserInfoResponse;
+import com.cart.demo.model.dto.user.UserResponse;
+import com.cart.demo.model.dto.user.UserSaveRequest;
+import com.cart.demo.model.dto.user.UserUpdateRequest;
 import com.cart.demo.model.entity.Cart;
 import com.cart.demo.model.entity.User;
 import com.cart.demo.model.entity.UserInfo;

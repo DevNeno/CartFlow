@@ -1,8 +1,8 @@
 package com.cart.demo.controller;
 
-import com.cart.demo.dto.user.UserResponse;
-import com.cart.demo.dto.user.UserSaveRequest;
-import com.cart.demo.dto.user.UserUpdateRequest;
+import com.cart.demo.model.dto.user.UserResponse;
+import com.cart.demo.model.dto.user.UserSaveRequest;
+import com.cart.demo.model.dto.user.UserUpdateRequest;
 import com.cart.demo.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

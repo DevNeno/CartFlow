@@ -1,6 +1,6 @@
 package com.cart.demo.controller;
 
-import com.cart.demo.dto.purchase.PurchaseOrderResponse;
+import com.cart.demo.model.dto.purchase.PurchaseOrderResponse;
 import com.cart.demo.service.PurchaseOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

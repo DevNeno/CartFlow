@@ -1,4 +1,4 @@
-package com.cart.demo.dto.product;
+package com.cart.demo.model.dto.product;
 
 import com.cart.demo.model.enumeration.Category;
 import jakarta.validation.constraints.NotBlank;
