@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,8 +29,11 @@ public class Cart {
     @JoinColumn(name="user_cart")
     private User user;
 
+    private LocalDateTime creationDate;
+
     public  Cart(CartStatus status, User user) {
         this.status = status;
         this.user = user;
+        this.creationDate = LocalDateTime.now();
     }
 }

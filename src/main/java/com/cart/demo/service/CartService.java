@@ -5,8 +5,8 @@ import com.cart.demo.model.dto.cart.CartResponse;
 
 public interface CartService {
     CartResponse findById(Long id);
-    CartResponse addProduct(Long id, CartProductRequest request);
-    CartResponse updateProduct(Long id, CartProductRequest request);
-    CartResponse deleteProduct(Long id, Long productId);
-    void delete(Long id);
+    CartResponse addProduct(Long userId, CartProductRequest request);
+    CartResponse updateProduct(Long userId, CartProductRequest request);
+    CartResponse deleteProduct(Long userId, Long productId);
+    CartResponse getCurrentCart(Long userId);
 }

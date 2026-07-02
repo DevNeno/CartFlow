@@ -7,29 +7,31 @@ import com.cart.demo.exception.CartAlreadyClosedException;
 import com.cart.demo.model.entity.Cart;
 import com.cart.demo.model.entity.CartProductQuantity;
 import com.cart.demo.model.entity.Product;
+import com.cart.demo.model.entity.User;
 import com.cart.demo.model.enumeration.CartStatus;
 import com.cart.demo.repository.CartProductQuantityRepository;
 import com.cart.demo.repository.CartRepository;
 import com.cart.demo.repository.ProductRepository;
 import com.cart.demo.service.CartService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.cart.demo.model.enumeration.CartStatus.ACTIVE;
+
 @Service
 public class CartServiceImpl implements CartService {
 
-    private final CartRepository cartRepository;
-    private final ProductRepository productRepository;
-    private final CartProductQuantityRepository cartProductQuantityRepository;
+    @Autowired
+    private CartRepository cartRepository;
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
+    private CartProductQuantityRepository cartProductQuantityRepository;
 
-    public CartServiceImpl(CartRepository cartRepository, ProductRepository productRepository,  CartProductQuantityRepository cartProductQuantityRepository) {
-        this.cartRepository = cartRepository;
-        this.productRepository = productRepository;
-        this.cartProductQuantityRepository = cartProductQuantityRepository;
-    }
 
     @Override
     public CartResponse findById(Long id) {
@@ -54,14 +56,10 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public CartResponse addProduct(Long id, CartProductRequest request) {
-        Cart cart = cartRepository.findById(id).orElse(null);
+    public CartResponse addProduct(Long userId, CartProductRequest request) {
+        Cart cart = cartRepository.findByClientIdAndStauts(userId, ACTIVE);
         if (cart == null) {
-            throw new ResourceNotFoundException("Cart not found");
-        }
-
-        if (cart.getStatus().equals(CartStatus.ARCHIEVED) || cart.getStatus().equals(CartStatus.ABANDONED)){
-            throw new CartAlreadyClosedException();
+            throw new ResourceNotFoundException("User not found");
         }
 
         Product product = productRepository.findById(request.productId()).orElse(null);
@@ -90,14 +88,10 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public CartResponse updateProduct(Long id, CartProductRequest request){
-        Cart cart = cartRepository.findById(id).orElse(null);
+    public CartResponse updateProduct(Long userId, CartProductRequest request){
+        Cart cart = cartRepository.findByClientIdAndStauts(userId, ACTIVE);
         if (cart == null) {
-            throw new ResourceNotFoundException("Cart not found");
-        }
-
-        if (cart.getStatus().equals(CartStatus.ARCHIEVED) || cart.getStatus().equals(CartStatus.ABANDONED)){
-            throw new CartAlreadyClosedException();
+            throw new ResourceNotFoundException("User not found");
         }
 
         List<CartProductQuantityResponse> productResponseList = new ArrayList<>();
@@ -124,14 +118,10 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public CartResponse deleteProduct(Long id, Long productId) {
-        Cart cart = cartRepository.findById(id).orElse(null);
+    public CartResponse deleteProduct(Long userId, Long productId) {
+        Cart cart = cartRepository.findByClientIdAndStauts(userId, ACTIVE);
         if (cart == null) {
-            throw new ResourceNotFoundException("Cart not found");
-        }
-
-        if (cart.getStatus().equals(CartStatus.ARCHIEVED) || cart.getStatus().equals(CartStatus.ABANDONED)){
-            throw new CartAlreadyClosedException();
+            throw new ResourceNotFoundException("User not found");
         }
 
         int listSize =  cart.getProducts().size();
@@ -164,12 +154,27 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public void delete(Long id) {
-        Cart cart = cartRepository.findById(id).orElse(null);
+    public CartResponse getCurrentCart(Long userId) {
+        Cart cart = cartRepository.findByClientIdAndStauts(userId, ACTIVE);
+
         if (cart == null) {
-            throw new ResourceNotFoundException("Cart not found");
+            throw new ResourceNotFoundException("User not found");
         }
-        cartRepository.delete(cart);
+
+        List<CartProductQuantityResponse> productResponseList = new ArrayList<>();
+        float totalPrice = 0;
+        for (CartProductQuantity cartProductQuantity : cart.getProducts()) {
+
+            CartProductQuantityResponse cartProductQuantityResponse = new CartProductQuantityResponse(
+                    cartProductQuantity.getProduct().getName(),
+                    cartProductQuantity.getProduct().getPrice(),
+                    cartProductQuantity.getQuantity()
+            );
+            productResponseList.add(cartProductQuantityResponse);
+            totalPrice = totalPrice + cartProductQuantity.getQuantity() * cartProductQuantity.getProduct().getPrice();
+        }
+        return new CartResponse(cart.getStatus(), productResponseList, totalPrice);
+
     }
 
 }

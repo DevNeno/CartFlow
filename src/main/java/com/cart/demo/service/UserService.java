@@ -7,9 +7,9 @@ import com.cart.demo.model.dto.user.UserUpdateRequest;
 import java.util.List;
 
 public interface UserService {
-    public List<UserResponse> findAll();
-    public UserResponse findById(Long id);
-    public UserResponse save(UserSaveRequest request);
-    public UserResponse update(Long id, UserUpdateRequest request);
-    public void deleteById(Long id);
+    List<UserResponse> findAll();
+    UserResponse findById(Long id);
+    UserResponse save(UserSaveRequest request);
+    UserResponse update(Long id, UserUpdateRequest request);
+    void deleteById(Long id);
 }

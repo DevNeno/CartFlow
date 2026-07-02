@@ -21,18 +21,23 @@ public class CartController
         return new ResponseEntity<>(cartService.findById(id), HttpStatus.OK);
     }
 
-    @PostMapping("/{id}")
-    public ResponseEntity<CartResponse> addProductToCart(@PathVariable Long id, @Valid @RequestBody CartProductRequest request){
-        return new ResponseEntity<>(cartService.addProduct(id, request), HttpStatus.OK);
+    @PostMapping("/user/{userId}")
+    public ResponseEntity<CartResponse> addProductToCart(@PathVariable Long userId, @Valid @RequestBody CartProductRequest request){
+        return new ResponseEntity<>(cartService.addProduct(userId, request), HttpStatus.OK);
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<CartResponse> updateProduct(@PathVariable Long id, @Valid @RequestBody CartProductRequest request){
-        return new ResponseEntity<>(cartService.updateProduct(id, request), HttpStatus.OK);
+    @PatchMapping("/user/{userId}")
+    public ResponseEntity<CartResponse> updateProduct(@PathVariable Long userId, @Valid @RequestBody CartProductRequest request){
+        return new ResponseEntity<>(cartService.updateProduct(userId, request), HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}/products/{productId}")
-    public ResponseEntity<CartResponse> removeProductFromCart(@PathVariable Long id, @PathVariable Long productId){
-        return new ResponseEntity<>(cartService.deleteProduct(id, productId), HttpStatus.OK);
+    @DeleteMapping("/user/{userId}/products/{productId}")
+    public ResponseEntity<CartResponse> removeProductFromCart(@PathVariable Long userId, @PathVariable Long productId){
+        return new ResponseEntity<>(cartService.deleteProduct(userId, productId), HttpStatus.OK);
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<CartResponse> getCurrentCartFromClient(@PathVariable Long userId){
+        return new ResponseEntity<>(cartService.getCurrentCart(userId), HttpStatus.OK);
     }
 }
