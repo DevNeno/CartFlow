@@ -1,32 +1,30 @@
 package com.cart.demo.service.impl;
 
+import com.cart.demo.event.user.CreateInitialCartEvent;
 import com.cart.demo.model.dto.user.UserInfoResponse;
 import com.cart.demo.model.dto.user.UserResponse;
 import com.cart.demo.model.dto.user.UserSaveRequest;
 import com.cart.demo.model.dto.user.UserUpdateRequest;
-import com.cart.demo.model.entity.Cart;
 import com.cart.demo.model.entity.User;
 import com.cart.demo.model.entity.UserInfo;
-import com.cart.demo.repository.CartRepository;
 import com.cart.demo.repository.UserRepository;
 import com.cart.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.cart.demo.model.enumeration.CartStatus.ACTIVE;
-
 @Service
 public class UserServiceImpl  implements UserService {
 
     @Autowired
-    private UserRepository userRepository;
+    private ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    private CartRepository cartRepository;
+    private UserRepository userRepository;
 
     @Override
     public List<UserResponse> findAll() {
@@ -92,9 +90,8 @@ public class UserServiceImpl  implements UserService {
                 savedUser.getUserInfo().getCountry()
         );
 
-        // Create user cart
-        Cart cart = new Cart(ACTIVE, savedUser);
-        cartRepository.save(cart);
+        // Send event to create initial cart
+        eventPublisher.publishEvent(new CreateInitialCartEvent(savedUser.getId()));
 
         return new UserResponse(
                 savedUser.getId(),

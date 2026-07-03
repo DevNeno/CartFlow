@@ -23,17 +23,15 @@ public class Cart {
     private CartStatus status;
 
     @OneToMany(mappedBy = "cart")
-    private List<CartProductQuantity> products = new ArrayList<>();
+    private final List<CartProductQuantity> products = new ArrayList<>();
 
-    @ManyToOne
-    @JoinColumn(name="user_cart")
-    private User user;
+    private Long userId;
 
     private LocalDateTime creationDate;
 
-    public  Cart(CartStatus status, User user) {
+    public  Cart(CartStatus status, Long userId) {
         this.status = status;
-        this.user = user;
+        this.userId = userId;
         this.creationDate = LocalDateTime.now();
     }
 }

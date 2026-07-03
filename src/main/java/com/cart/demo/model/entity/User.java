@@ -27,9 +27,6 @@ public class User {
     private UserInfo userInfo;
 
     @OneToMany(mappedBy = "user")
-    private List<Cart> carts = new ArrayList<>();
-
-    @OneToMany(mappedBy = "user")
     private List<PurchaseOrder> purchaseOrders = new ArrayList<>();
 
     public User(String username, String password, UserInfo userInfo) {
