@@ -1,12 +1,12 @@
 package com.cart.demo.service.impl;
 
+import com.cart.demo.mediator.CartProductMediator;
 import com.cart.demo.model.dto.product.ProductResponse;
 import com.cart.demo.model.dto.product.ProductSaveRequest;
 import com.cart.demo.model.dto.product.ProductUpdateRequest;
 import com.cart.demo.model.entity.Product;
 import com.cart.demo.repository.ProductRepository;
 import com.cart.demo.service.ProductService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -16,9 +16,13 @@ import java.util.List;
 @Service
 public class ProductServiceImpl implements ProductService {
 
+    private final CartProductMediator mediator;
+    private final ProductRepository productRepository;
 
-    @Autowired
-    private ProductRepository productRepository;
+    public ProductServiceImpl(CartProductMediator mediator, ProductRepository productRepository) {
+        this.mediator = mediator;
+        this.productRepository = productRepository;
+    }
 
     @Override
     public List<ProductResponse> findAll() {
@@ -50,6 +54,15 @@ public class ProductServiceImpl implements ProductService {
                 product.getPrice(),
                 product.getCategory()
         );
+    }
+
+    @Override
+    public void findByIdMediator(Long id) {
+        Product product = productRepository.findById(id).orElse(null);
+        if (product == null) {
+            throw new ResourceNotFoundException("Product not found");
+        }
+        mediator.returnProductInfoById(product.getName(), product.getPrice());
     }
 
     @Override

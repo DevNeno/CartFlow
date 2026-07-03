@@ -4,6 +4,7 @@ import com.cart.demo.model.dto.cart.CartProductRequest;
 import com.cart.demo.model.dto.cart.CartResponse;
 
 public interface CartService {
+    void setProductInfo(String name, float price);
     void createActiveCart(Long userId);
     CartResponse findById(Long id);
     CartResponse addProduct(Long userId, CartProductRequest request);

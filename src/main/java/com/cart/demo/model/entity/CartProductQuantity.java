@@ -19,17 +19,15 @@ public class CartProductQuantity {
     @JoinColumn(name = "cartId")
     private Cart cart;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "productId")
-    private Product product;
+    private Long productId;
 
     // Setters
     @Setter
     private int quantity;
 
-    public CartProductQuantity(Cart cart, Product product, int quantity) {
+    public CartProductQuantity(Cart cart, Long productId, int quantity) {
         this.cart = cart;
-        this.product = product;
+        this.productId = productId;
         this.quantity = quantity;
     }
 

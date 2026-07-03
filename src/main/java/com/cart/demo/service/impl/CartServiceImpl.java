@@ -1,16 +1,17 @@
 package com.cart.demo.service.impl;
 
 import com.cart.demo.exception.UserAlreadyHasActiveCart;
+import com.cart.demo.mediator.CartProductMediator;
 import com.cart.demo.model.dto.cart.CartProductRequest;
 import com.cart.demo.model.dto.cart.CartProductQuantityResponse;
 import com.cart.demo.model.dto.cart.CartResponse;
 import com.cart.demo.model.entity.Cart;
+import com.cart.demo.model.entity.CartProductInfo;
 import com.cart.demo.model.entity.CartProductQuantity;
-import com.cart.demo.model.entity.Product;
 import com.cart.demo.repository.CartProductQuantityRepository;
 import com.cart.demo.repository.CartRepository;
-import com.cart.demo.repository.ProductRepository;
 import com.cart.demo.service.CartService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -22,14 +23,32 @@ import static com.cart.demo.model.enumeration.CartStatus.ACTIVE;
 @Service
 public class CartServiceImpl implements CartService {
 
+
+    ///
+    ///
+    ///
+    /// PROBAR MEDIATOR, COMMITEAR SI FUNCIONA Y CONTINUAR DESACOPLAMIENTO
+    ///
+    ///
+    ///
+    private final CartProductMediator mediator;
+    private final ApplicationEventPublisher eventPublisher;
     private final CartRepository cartRepository;
-    private final ProductRepository productRepository;
     private final CartProductQuantityRepository cartProductQuantityRepository;
 
-    public CartServiceImpl(CartRepository cartRepository, ProductRepository productRepository, CartProductQuantityRepository cartProductQuantityRepository) {
+    private final CartProductInfo productInfo = new CartProductInfo();
+
+    public CartServiceImpl(CartProductMediator mediator, ApplicationEventPublisher eventPublisher, CartRepository cartRepository, CartProductQuantityRepository cartProductQuantityRepository) {
+        this.mediator = mediator;
+        this.eventPublisher = eventPublisher;
         this.cartRepository = cartRepository;
-        this.productRepository = productRepository;
         this.cartProductQuantityRepository = cartProductQuantityRepository;
+    }
+
+    @Override
+    public void setProductInfo(String name, float price) {
+        productInfo.setName(name);
+        productInfo.setPrice(price);
     }
 
     @Override
@@ -51,19 +70,8 @@ public class CartServiceImpl implements CartService {
             throw new ResourceNotFoundException("Cart not found");
         }
 
-        List<CartProductQuantityResponse> productResponseList = new ArrayList<>();
-        float totalPrice = 0;
-        for (CartProductQuantity cartProductQuantity : cart.getProducts()) {
 
-            CartProductQuantityResponse cartProductQuantityResponse = new CartProductQuantityResponse(
-                    cartProductQuantity.getProduct().getName(),
-                    cartProductQuantity.getProduct().getPrice(),
-                    cartProductQuantity.getQuantity()
-            );
-            productResponseList.add(cartProductQuantityResponse);
-            totalPrice = totalPrice + cartProductQuantity.getQuantity() * cartProductQuantity.getProduct().getPrice();
-        }
-       return new CartResponse(cart.getStatus(), productResponseList, totalPrice);
+        return generateResponse(cart);
     }
 
     @Override
@@ -73,29 +81,15 @@ public class CartServiceImpl implements CartService {
             throw new ResourceNotFoundException("User not found");
         }
 
-        Product product = productRepository.findById(request.productId()).orElse(null);
-        if (product == null) {
-            throw new ResourceNotFoundException("Product not found");
-        }
+        // Check if product ID exists
+        eventPublisher.publishEvent(request.productId());
 
-        CartProductQuantity productQuantity = new CartProductQuantity(cart, product, request.quantity());
+        CartProductQuantity productQuantity = new CartProductQuantity(cart, request.productId(), request.quantity());
         CartProductQuantity savedCartProductQuantity = cartProductQuantityRepository.save(productQuantity);
         cart.getProducts().add(savedCartProductQuantity);
         cartRepository.save(cart);
 
-        List<CartProductQuantityResponse> productResponseList = new ArrayList<>();
-        float totalPrice = 0;
-        for (CartProductQuantity cartProductQuantity : cart.getProducts()) {
-
-            CartProductQuantityResponse cartProductQuantityResponse = new CartProductQuantityResponse(
-                    cartProductQuantity.getProduct().getName(),
-                    cartProductQuantity.getProduct().getPrice(),
-                    cartProductQuantity.getQuantity()
-            );
-            productResponseList.add(cartProductQuantityResponse);
-            totalPrice = totalPrice + cartProductQuantity.getQuantity() * cartProductQuantity.getProduct().getPrice();
-        }
-        return new CartResponse(cart.getStatus(), productResponseList, totalPrice);
+        return generateResponse(cart);
     }
 
     @Override
@@ -105,27 +99,7 @@ public class CartServiceImpl implements CartService {
             throw new ResourceNotFoundException("User not found");
         }
 
-        List<CartProductQuantityResponse> productResponseList = new ArrayList<>();
-        float totalPrice = 0;
-        for (CartProductQuantity cartProductQuantity : cart.getProducts()) {
-
-            if (request.productId().equals(cartProductQuantity.getProduct().getId())) {
-                cartProductQuantity.setQuantity(request.quantity());
-                cartProductQuantityRepository.save(cartProductQuantity);
-            }
-
-            CartProductQuantityResponse cartProductQuantityResponse = new CartProductQuantityResponse(
-                    cartProductQuantity.getProduct().getName(),
-                    cartProductQuantity.getProduct().getPrice(),
-                    cartProductQuantity.getQuantity()
-            );
-            productResponseList.add(cartProductQuantityResponse);
-            totalPrice = totalPrice + cartProductQuantity.getQuantity() * cartProductQuantity.getProduct().getPrice();
-        }
-        // Save change
-        cartRepository.save(cart);
-
-        return new CartResponse(cart.getStatus(), productResponseList, totalPrice);
+        return generateResponse(cart);
     }
 
     @Override
@@ -139,7 +113,7 @@ public class CartServiceImpl implements CartService {
         int count = 0;
         for (CartProductQuantity cartProductQuantity : cart.getProducts()) {
             count++;
-            if (cartProductQuantity.getProduct().getId().equals(productId)) {
+            if (cartProductQuantity.getProductId().equals(productId)) {
                 cart.getProducts().remove(cartProductQuantity);
                 cartProductQuantityRepository.deleteById(productId);
                 break;
@@ -150,18 +124,7 @@ public class CartServiceImpl implements CartService {
         }
         cartRepository.save(cart);
 
-        List<CartProductQuantityResponse> productResponseList = new ArrayList<>();
-        float totalPrice = 0;
-        for (CartProductQuantity cartProductQuantity : cart.getProducts()) {
-            CartProductQuantityResponse cartProductQuantityResponse = new CartProductQuantityResponse(
-                    cartProductQuantity.getProduct().getName(),
-                    cartProductQuantity.getProduct().getPrice(),
-                    cartProductQuantity.getQuantity()
-            );
-            productResponseList.add(cartProductQuantityResponse);
-            totalPrice = totalPrice + cartProductQuantity.getQuantity() * cartProductQuantity.getProduct().getPrice();
-        }
-        return new CartResponse(cart.getStatus(), productResponseList, totalPrice);
+        return generateResponse(cart);
     }
 
     @Override
@@ -172,20 +135,24 @@ public class CartServiceImpl implements CartService {
             throw new ResourceNotFoundException("User not found");
         }
 
+        return generateResponse(cart);
+    }
+
+    private CartResponse generateResponse(Cart cart){
         List<CartProductQuantityResponse> productResponseList = new ArrayList<>();
         float totalPrice = 0;
         for (CartProductQuantity cartProductQuantity : cart.getProducts()) {
+            mediator.findProductInfoById(cartProductQuantity.getProductId());
 
             CartProductQuantityResponse cartProductQuantityResponse = new CartProductQuantityResponse(
-                    cartProductQuantity.getProduct().getName(),
-                    cartProductQuantity.getProduct().getPrice(),
+                    productInfo.getName(),
+                    productInfo.getPrice(),
                     cartProductQuantity.getQuantity()
             );
             productResponseList.add(cartProductQuantityResponse);
-            totalPrice = totalPrice + cartProductQuantity.getQuantity() * cartProductQuantity.getProduct().getPrice();
+            totalPrice = totalPrice + cartProductQuantity.getQuantity() * productInfo.getPrice();
         }
         return new CartResponse(cart.getStatus(), productResponseList, totalPrice);
-
     }
 
 }
