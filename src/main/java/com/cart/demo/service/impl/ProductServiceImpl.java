@@ -1,12 +1,14 @@
 package com.cart.demo.service.impl;
 
 import com.cart.demo.mediator.CartProductMediator;
+import com.cart.demo.model.dto.mediator.ProductSummaryDTO;
 import com.cart.demo.model.dto.product.ProductResponse;
 import com.cart.demo.model.dto.product.ProductSaveRequest;
 import com.cart.demo.model.dto.product.ProductUpdateRequest;
 import com.cart.demo.model.entity.Product;
 import com.cart.demo.repository.ProductRepository;
 import com.cart.demo.service.ProductService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +21,7 @@ public class ProductServiceImpl implements ProductService {
     private final CartProductMediator mediator;
     private final ProductRepository productRepository;
 
-    public ProductServiceImpl(CartProductMediator mediator, ProductRepository productRepository) {
+    public ProductServiceImpl(@Lazy CartProductMediator mediator, ProductRepository productRepository) {
         this.mediator = mediator;
         this.productRepository = productRepository;
     }
@@ -121,4 +123,14 @@ public class ProductServiceImpl implements ProductService {
         }
         productRepository.deleteById(id);
     }
+
+    @Override
+    public ProductSummaryDTO getProductSummary(Long id){
+        Product product = productRepository.findById(id).orElse(null);
+        if (product == null) {
+            throw new ResourceNotFoundException("Product not found");
+        }
+        return new ProductSummaryDTO(product.getId(), product.getName(), product.getPrice());
+    }
+
 }

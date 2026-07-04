@@ -1,6 +1,7 @@
 package com.cart.demo.mediator.impl;
 
 import com.cart.demo.mediator.CartProductMediator;
+import com.cart.demo.model.dto.mediator.ProductSummaryDTO;
 import com.cart.demo.service.CartService;
 import com.cart.demo.service.ProductService;
 import org.springframework.stereotype.Component;
@@ -25,4 +26,10 @@ public class CartProductMediatorImpl implements CartProductMediator {
     public void returnProductInfoById(String name, float price) {
         cartService.setProductInfo(name,price);
     }
+
+    @Override
+    public ProductSummaryDTO getProductSummaryById(Long productId){
+        return productService.getProductSummary(productId);
+    }
+
 }

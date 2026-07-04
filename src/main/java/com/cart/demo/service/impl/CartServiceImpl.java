@@ -1,6 +1,7 @@
 package com.cart.demo.service.impl;
 
-import com.cart.demo.exception.UserAlreadyHasActiveCart;
+import com.cart.demo.event.product.FindProductEvent;
+import com.cart.demo.exception.UserAlreadyHasActiveCartException;
 import com.cart.demo.mediator.CartProductMediator;
 import com.cart.demo.model.dto.cart.CartProductRequest;
 import com.cart.demo.model.dto.cart.CartProductQuantityResponse;
@@ -12,6 +13,7 @@ import com.cart.demo.repository.CartProductQuantityRepository;
 import com.cart.demo.repository.CartRepository;
 import com.cart.demo.service.CartService;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -19,27 +21,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.cart.demo.model.enumeration.CartStatus.ACTIVE;
+import static com.cart.demo.model.enumeration.CartStatus.ARCHIEVED;
 
 @Service
 public class CartServiceImpl implements CartService {
 
-
-    ///
-    ///
-    ///
-    /// PROBAR MEDIATOR, COMMITEAR SI FUNCIONA Y CONTINUAR DESACOPLAMIENTO
-    ///
-    ///
-    ///
-    private final CartProductMediator mediator;
+    private final CartProductMediator cartProductMediator;
     private final ApplicationEventPublisher eventPublisher;
     private final CartRepository cartRepository;
     private final CartProductQuantityRepository cartProductQuantityRepository;
 
     private final CartProductInfo productInfo = new CartProductInfo();
 
-    public CartServiceImpl(CartProductMediator mediator, ApplicationEventPublisher eventPublisher, CartRepository cartRepository, CartProductQuantityRepository cartProductQuantityRepository) {
-        this.mediator = mediator;
+    public CartServiceImpl(@Lazy CartProductMediator cartProductMediator, ApplicationEventPublisher eventPublisher, CartRepository cartRepository, CartProductQuantityRepository cartProductQuantityRepository) {
+        this.cartProductMediator = cartProductMediator;
         this.eventPublisher = eventPublisher;
         this.cartRepository = cartRepository;
         this.cartProductQuantityRepository = cartProductQuantityRepository;
@@ -59,7 +54,7 @@ public class CartServiceImpl implements CartService {
             cart = new Cart(ACTIVE, userId);
             cartRepository.save(cart);
         }else{
-            throw new UserAlreadyHasActiveCart();
+            throw new UserAlreadyHasActiveCartException();
         }
     }
 
@@ -75,6 +70,14 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    public void findByIdMediator(Long id){
+        Cart cart = cartRepository.findById(id).orElse(null);
+        if (cart == null) {
+            throw new ResourceNotFoundException("Cart not found");
+        }
+    }
+
+    @Override
     public CartResponse addProduct(Long userId, CartProductRequest request) {
         Cart cart = cartRepository.findByUserIdAndStatus(userId, ACTIVE);
         if (cart == null) {
@@ -82,7 +85,7 @@ public class CartServiceImpl implements CartService {
         }
 
         // Check if product ID exists
-        eventPublisher.publishEvent(request.productId());
+        eventPublisher.publishEvent(new FindProductEvent(request.productId()));
 
         CartProductQuantity productQuantity = new CartProductQuantity(cart, request.productId(), request.quantity());
         CartProductQuantity savedCartProductQuantity = cartProductQuantityRepository.save(productQuantity);
@@ -99,7 +102,20 @@ public class CartServiceImpl implements CartService {
             throw new ResourceNotFoundException("User not found");
         }
 
-        return generateResponse(cart);
+        int listSize =  cart.getProducts().size();
+        int count = 0;
+        for (CartProductQuantity cartProductQuantity : cart.getProducts()) {
+            count++;
+            if (cartProductQuantity.getProductId().equals(request.productId())) {
+                cartProductQuantity.setQuantity(request.quantity());
+                break;
+            }
+            if (count == listSize){
+                throw new ResourceNotFoundException("Product not found");
+            }
+        }
+        Cart updatedCart = cartRepository.save(cart);
+        return generateResponse(updatedCart);
     }
 
     @Override
@@ -138,11 +154,26 @@ public class CartServiceImpl implements CartService {
         return generateResponse(cart);
     }
 
+    // Used by event ArchiveCartEvent
+    @Override
+    public void archiveCart(Long id){
+        Cart cart = cartRepository.findById(id).orElse(null);
+
+        if (cart == null) {
+            throw new ResourceNotFoundException("Cart not found");
+        }
+
+        cart.setStatus(ARCHIEVED);
+        cartRepository.save(cart);
+
+        createActiveCart(cart.getUserId());
+    }
+
     private CartResponse generateResponse(Cart cart){
         List<CartProductQuantityResponse> productResponseList = new ArrayList<>();
         float totalPrice = 0;
         for (CartProductQuantity cartProductQuantity : cart.getProducts()) {
-            mediator.findProductInfoById(cartProductQuantity.getProductId());
+            cartProductMediator.findProductInfoById(cartProductQuantity.getProductId());
 
             CartProductQuantityResponse cartProductQuantityResponse = new CartProductQuantityResponse(
                     productInfo.getName(),

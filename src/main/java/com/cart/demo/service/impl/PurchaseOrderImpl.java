@@ -1,36 +1,40 @@
 package com.cart.demo.service.impl;
 
+import com.cart.demo.event.purchaseOrder.ArchiveCartEvent;
+import com.cart.demo.mediator.PurchaseCartMediator;
 import com.cart.demo.model.dto.purchase.PurchaseOrderProductResponse;
 import com.cart.demo.model.dto.purchase.PurchaseOrderResponse;
-import com.cart.demo.model.entity.Cart;
-import com.cart.demo.model.entity.CartProductQuantity;
-import com.cart.demo.model.entity.PurchaseOrder;
-import com.cart.demo.model.entity.PurchaseProductQuantity;
-import com.cart.demo.repository.CartRepository;
+import com.cart.demo.model.entity.*;
 import com.cart.demo.repository.PurchaseOrderProductRepository;
 import com.cart.demo.repository.PurchaseOrderRepository;
 import com.cart.demo.service.PurchaseOrderService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.Setter;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.cart.demo.model.enumeration.CartStatus.ARCHIEVED;
-
 @Service
 public class PurchaseOrderImpl implements PurchaseOrderService {
 
+    private final PurchaseCartMediator purchaseCartMediator;
+    private final ApplicationEventPublisher eventPublisher;
 
-    @Autowired
-    private PurchaseOrderRepository purchaseOrderRepository;
+    private final PurchaseOrderRepository purchaseOrderRepository;
+    private final PurchaseOrderProductRepository purchaseOrderProductRepository;
 
-    @Autowired
-    private CartRepository cartRepository;
+    @Setter
+    private List<PurchaseProductInfo> productInfoList = new ArrayList<>();
 
-    @Autowired
-    private PurchaseOrderProductRepository purchaseOrderProductRepository;
+    public PurchaseOrderImpl(@Lazy PurchaseCartMediator purchaseCartMediator, ApplicationEventPublisher eventPublisher, PurchaseOrderRepository purchaseOrderRepository, PurchaseOrderProductRepository purchaseOrderProductRepository){
+        this.purchaseCartMediator = purchaseCartMediator;
+        this.eventPublisher = eventPublisher;
+        this.purchaseOrderRepository = purchaseOrderRepository;
+        this.purchaseOrderProductRepository = purchaseOrderProductRepository;
+    }
 
     @Override
     public PurchaseOrderResponse findById(Long id) {
@@ -42,8 +46,8 @@ public class PurchaseOrderImpl implements PurchaseOrderService {
         List<PurchaseOrderProductResponse> products = new ArrayList<>();
         for (PurchaseProductQuantity purchaseProductQuantity : purchaseOrder.getOrderProducts()){
             PurchaseOrderProductResponse purchaseOrderProductResponse = new PurchaseOrderProductResponse(
-                    purchaseProductQuantity.getProduct().getName(),
-                    purchaseProductQuantity.getProduct().getPrice(),
+                    purchaseProductQuantity.getProductName(),
+                    purchaseProductQuantity.getUnitPrice(),
                     purchaseProductQuantity.getQuantity()
             );
             products.add(purchaseOrderProductResponse);
@@ -53,10 +57,8 @@ public class PurchaseOrderImpl implements PurchaseOrderService {
 
     @Override
     public PurchaseOrderResponse purchase(Long cartId) {
-        Cart cart =  cartRepository.findById(cartId).orElse(null);
-        if (cart == null) {
-            throw new ResourceNotFoundException("Cart Not Found");
-        }
+
+        purchaseCartMediator.findByIdMediatorPurchase(cartId);
         PurchaseOrder purchase = purchaseOrderRepository.save(new PurchaseOrder());
 
         List<PurchaseProductQuantity> products = new ArrayList<>();
@@ -64,21 +66,22 @@ public class PurchaseOrderImpl implements PurchaseOrderService {
 
         List<PurchaseOrderProductResponse> responseProducts = new ArrayList<>();
 
-        for (CartProductQuantity cartProductQuantity : cart.getProducts()) {
+        for (PurchaseProductInfo product : productInfoList) {
             PurchaseProductQuantity purchaseProduct = new PurchaseProductQuantity(
                     purchase,
-                    cartProductQuantity.getProduct(),
-                    cartProductQuantity.getQuantity(),
-                    cartProductQuantity.getProduct().getPrice()
+                    product.getId(),
+                    product.getName(),
+                    product.getQuantity(),
+                    product.getPrice()
             );
             purchaseOrderProductRepository.save(purchaseProduct);
             products.add(purchaseProduct);
-            totalPrice = totalPrice + cartProductQuantity.getQuantity() * cartProductQuantity.getProduct().getPrice();
+            totalPrice = totalPrice + product.getQuantity() * product.getPrice();
 
             PurchaseOrderProductResponse purchaseOrderProductResponse = new PurchaseOrderProductResponse(
-                    cartProductQuantity.getProduct().getName(),
-                    cartProductQuantity.getProduct().getPrice(),
-                    cartProductQuantity.getQuantity()
+                    product.getName(),
+                    product.getPrice(),
+                    product.getQuantity()
             );
             responseProducts.add(purchaseOrderProductResponse);
         }
@@ -86,9 +89,14 @@ public class PurchaseOrderImpl implements PurchaseOrderService {
         purchase.setTotal_price(totalPrice);
         purchaseOrderRepository.save(purchase);
 
-        cart.setStatus(ARCHIEVED);
-        cartRepository.save(cart);
+        eventPublisher.publishEvent(new ArchiveCartEvent(cartId));
 
         return new PurchaseOrderResponse(purchase.getId(), responseProducts, totalPrice);
     }
+
+    // Method used by mediator
+    public void addProductInfo(Long id, String name, float price, int quantity){
+        productInfoList.add(new PurchaseProductInfo(id, name, price, quantity));
+    }
+
 }

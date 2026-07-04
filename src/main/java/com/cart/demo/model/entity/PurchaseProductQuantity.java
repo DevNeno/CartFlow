@@ -19,9 +19,8 @@ public class PurchaseProductQuantity {
     @JoinColumn(name = "purchaseId")
     private PurchaseOrder purchase;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "productId")
-    private Product product;
+    private Long productId;
+    private String productName;
 
     // Setters
     @Setter
@@ -30,9 +29,10 @@ public class PurchaseProductQuantity {
     @Setter
     private float unitPrice;
 
-    public PurchaseProductQuantity(PurchaseOrder purchase, Product product, int quantity, float unitPrice) {
+    public PurchaseProductQuantity(PurchaseOrder purchase, Long productId, String name, int quantity, float unitPrice) {
         this.purchase = purchase;
-        this.product = product;
+        this.productId = productId;
+        this.productName = name;
         this.quantity = quantity;
         this.unitPrice = unitPrice;
     }

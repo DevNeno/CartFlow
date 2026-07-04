@@ -28,11 +28,7 @@ public class Product {
     @Enumerated(EnumType.STRING)
     private Category category;
 
-    @OneToMany(mappedBy = "product")
-    private List<PurchaseProductQuantity> purchaseProductQuantity = new ArrayList<>();
-
-    @OneToMany(mappedBy = "product")
-    private List<CartProductQuantity> cartsCartProductQuantity = new ArrayList<>();
+    private List<Long> purchaseIdList = new ArrayList<>();
 
     public Product(String name, String description, float price, Category category) {
         this.name = name;

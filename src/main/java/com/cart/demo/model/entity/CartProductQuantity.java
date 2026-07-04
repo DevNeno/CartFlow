@@ -20,6 +20,8 @@ public class CartProductQuantity {
     private Cart cart;
 
     private Long productId;
+    private String name;
+    private float price;
 
     // Setters
     @Setter
