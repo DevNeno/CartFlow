@@ -17,8 +17,8 @@ public class PurchaseCartMediatorImpl implements PurchaseCartMediator {
     }
 
     @Override
-    public void findByIdMediatorPurchase(Long cartId) {
-        cartService.findByIdMediator(cartId);
+    public void findByIdMediatorPurchase(Long cartId, int listIndex) {
+        cartService.findByIdMediatorPurchase(cartId, listIndex);
     }
 
     @Override

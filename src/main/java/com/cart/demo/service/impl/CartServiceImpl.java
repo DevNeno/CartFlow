@@ -3,6 +3,7 @@ package com.cart.demo.service.impl;
 import com.cart.demo.event.product.FindProductEvent;
 import com.cart.demo.exception.UserAlreadyHasActiveCartException;
 import com.cart.demo.mediator.CartProductMediator;
+import com.cart.demo.mediator.PurchaseCartMediator;
 import com.cart.demo.model.dto.cart.CartProductRequest;
 import com.cart.demo.model.dto.cart.CartProductQuantityResponse;
 import com.cart.demo.model.dto.cart.CartResponse;
@@ -26,6 +27,7 @@ import static com.cart.demo.model.enumeration.CartStatus.ARCHIEVED;
 @Service
 public class CartServiceImpl implements CartService {
 
+    private final PurchaseCartMediator purchaseCartMediator;
     private final CartProductMediator cartProductMediator;
     private final ApplicationEventPublisher eventPublisher;
     private final CartRepository cartRepository;
@@ -33,7 +35,8 @@ public class CartServiceImpl implements CartService {
 
     private final CartProductInfo productInfo = new CartProductInfo();
 
-    public CartServiceImpl(@Lazy CartProductMediator cartProductMediator, ApplicationEventPublisher eventPublisher, CartRepository cartRepository, CartProductQuantityRepository cartProductQuantityRepository) {
+    public CartServiceImpl(@Lazy PurchaseCartMediator purchaseCartMediator , @Lazy CartProductMediator cartProductMediator, ApplicationEventPublisher eventPublisher, CartRepository cartRepository, CartProductQuantityRepository cartProductQuantityRepository) {
+        this.purchaseCartMediator = purchaseCartMediator;
         this.cartProductMediator = cartProductMediator;
         this.eventPublisher = eventPublisher;
         this.cartRepository = cartRepository;
@@ -47,28 +50,16 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public void createActiveCart(Long userId){
-        Cart cart = cartRepository.findByUserIdAndStatus(userId, ACTIVE);
-
-        if (cart == null){
-            cart = new Cart(ACTIVE, userId);
-            cartRepository.save(cart);
-        }else{
-            throw new UserAlreadyHasActiveCartException();
-        }
-    }
-
-    @Override
     public CartResponse findById(Long id) {
         Cart cart = cartRepository.findById(id).orElse(null);
         if (cart == null) {
             throw new ResourceNotFoundException("Cart not found");
         }
 
-
         return generateResponse(cart);
     }
 
+    // Used by CartProductMediator
     @Override
     public void findByIdMediator(Long id){
         Cart cart = cartRepository.findById(id).orElse(null);
@@ -76,6 +67,32 @@ public class CartServiceImpl implements CartService {
             throw new ResourceNotFoundException("Cart not found");
         }
     }
+
+
+    // Used by PurchaseCartMediator
+    @Override
+    public void findByIdMediatorPurchase(Long cartId, int listIndex){
+        Cart cart = cartRepository.findById(cartId).orElse(null);
+        if (cart == null) {
+            throw new ResourceNotFoundException("Cart not found");
+        }
+
+        if (listIndex < cart.getProducts().size()){
+            CartProductQuantity productQuantity = cart.getProducts().get(listIndex);
+
+            cartProductMediator.findProductInfoById(productQuantity.getProductId());
+            purchaseCartMediator.returnCartInfoById(
+                    productQuantity.getId(),
+                    productInfo.getName(),
+                    productInfo.getPrice(),
+                    productQuantity.getQuantity()
+            );
+        }else{
+            purchaseCartMediator.returnCartInfoById((long)-1, "", 0, 0);
+        }
+
+    }
+
 
     @Override
     public CartResponse addProduct(Long userId, CartProductRequest request) {
@@ -184,6 +201,17 @@ public class CartServiceImpl implements CartService {
             totalPrice = totalPrice + cartProductQuantity.getQuantity() * productInfo.getPrice();
         }
         return new CartResponse(cart.getStatus(), productResponseList, totalPrice);
+    }
+
+    private void createActiveCart(Long userId){
+        Cart cart = cartRepository.findByUserIdAndStatus(userId, ACTIVE);
+
+        if (cart == null){
+            cart = new Cart(ACTIVE, userId);
+            cartRepository.save(cart);
+        }else{
+            throw new UserAlreadyHasActiveCartException();
+        }
     }
 
 }

@@ -27,7 +27,7 @@ public class PurchaseOrderImpl implements PurchaseOrderService {
     private final PurchaseOrderProductRepository purchaseOrderProductRepository;
 
     @Setter
-    private List<PurchaseProductInfo> productInfoList = new ArrayList<>();
+    private PurchaseProductInfo productInfo = new PurchaseProductInfo();
 
     public PurchaseOrderImpl(@Lazy PurchaseCartMediator purchaseCartMediator, ApplicationEventPublisher eventPublisher, PurchaseOrderRepository purchaseOrderRepository, PurchaseOrderProductRepository purchaseOrderProductRepository){
         this.purchaseCartMediator = purchaseCartMediator;
@@ -57,34 +57,39 @@ public class PurchaseOrderImpl implements PurchaseOrderService {
 
     @Override
     public PurchaseOrderResponse purchase(Long cartId) {
-
-        purchaseCartMediator.findByIdMediatorPurchase(cartId);
         PurchaseOrder purchase = purchaseOrderRepository.save(new PurchaseOrder());
 
         List<PurchaseProductQuantity> products = new ArrayList<>();
-        float totalPrice = 0;
-
         List<PurchaseOrderProductResponse> responseProducts = new ArrayList<>();
 
-        for (PurchaseProductInfo product : productInfoList) {
+
+        float totalPrice = 0;
+        int listIndex = 0;
+        while (true) {
+            purchaseCartMediator.findByIdMediatorPurchase(cartId, listIndex);
+            if(productInfo.getId() == -1){
+                break;
+            }
             PurchaseProductQuantity purchaseProduct = new PurchaseProductQuantity(
                     purchase,
-                    product.getId(),
-                    product.getName(),
-                    product.getQuantity(),
-                    product.getPrice()
+                    productInfo.getId(),
+                    productInfo.getName(),
+                    productInfo.getQuantity(),
+                    productInfo.getPrice()
             );
             purchaseOrderProductRepository.save(purchaseProduct);
             products.add(purchaseProduct);
-            totalPrice = totalPrice + product.getQuantity() * product.getPrice();
+            totalPrice = totalPrice + productInfo.getQuantity() * productInfo.getPrice();
 
             PurchaseOrderProductResponse purchaseOrderProductResponse = new PurchaseOrderProductResponse(
-                    product.getName(),
-                    product.getPrice(),
-                    product.getQuantity()
+                    productInfo.getName(),
+                    productInfo.getPrice(),
+                    productInfo.getQuantity()
             );
             responseProducts.add(purchaseOrderProductResponse);
+            listIndex++;
         }
+
         purchase.setOrderProducts(products);
         purchase.setTotal_price(totalPrice);
         purchaseOrderRepository.save(purchase);
@@ -96,7 +101,8 @@ public class PurchaseOrderImpl implements PurchaseOrderService {
 
     // Method used by mediator
     public void addProductInfo(Long id, String name, float price, int quantity){
-        productInfoList.add(new PurchaseProductInfo(id, name, price, quantity));
+        productInfo = new PurchaseProductInfo(id, name, price, quantity);
+
     }
 
 }
