@@ -1,6 +1,7 @@
 package com.cart.demo.service.impl;
 
 import com.cart.demo.event.product.FindProductEvent;
+import com.cart.demo.exception.CartAlreadyClosedException;
 import com.cart.demo.mediator.CartProductMediator;
 import com.cart.demo.mediator.PurchaseCartMediator;
 import com.cart.demo.model.dto.cart.CartProductRequest;
@@ -20,8 +21,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.cart.demo.model.enumeration.CartStatus.ACTIVE;
-import static com.cart.demo.model.enumeration.CartStatus.ARCHIEVED;
+import static com.cart.demo.model.enumeration.CartStatus.*;
 
 @Service
 public class CartServiceImpl implements CartService {
@@ -184,6 +184,9 @@ public class CartServiceImpl implements CartService {
         Cart cart = cartRepository.findById(cartId).orElse(null);
         if (cart == null) {
             throw new ResourceNotFoundException("Cart not found");
+        }
+        if (cart.getStatus().equals(ARCHIEVED) || cart.getStatus().equals(ABANDONED)){
+            throw new CartAlreadyClosedException();
         }
 
         if (listIndex < cart.getProducts().size()){

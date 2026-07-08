@@ -15,4 +15,10 @@ public class GlobalExceptionHandler {
         ApiResponse apiResponse = new ApiResponse(ex.getMessage());
         return new ResponseEntity<>(apiResponse, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(CartAlreadyClosedException.class)
+    public ResponseEntity<ApiResponse> handlerCartAlreadyClosedException() {
+        ApiResponse apiResponse = new ApiResponse("Cart already closed");
+        return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+    }
 }

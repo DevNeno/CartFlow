@@ -15,6 +15,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +59,7 @@ public class PurchaseOrderImpl implements PurchaseOrderService {
     }
 
     @Override
+    @Transactional
     public PurchaseOrderResponse purchase(Long cartId) {
         PurchaseOrder purchase = purchaseOrderRepository.save(new PurchaseOrder());
 
