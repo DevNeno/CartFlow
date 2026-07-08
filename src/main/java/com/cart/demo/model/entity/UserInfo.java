@@ -3,6 +3,7 @@ package com.cart.demo.model.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "userInfo")
@@ -12,10 +13,15 @@ public class UserInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    @Setter
     private String firstname;
+    @Setter
     private String lastname;
+    @Setter
     private String city;
+    @Setter
     private String country;
+    @Setter
     @OneToOne(mappedBy = "userInfo")
     private User user;
 
@@ -23,20 +29,6 @@ public class UserInfo {
         this.firstname = firstname;
         this.lastname = lastname;
         this.city = city;
-        this.country = country;
-    }
-
-    // Setters
-    public void setFirstname(String firstname) {
-        this.firstname = firstname;
-    }
-    public  void setLastname(String lastname) {
-        this.lastname = lastname;
-    }
-    public void setCity(String city){
-        this.city = city;
-    }
-    public void setCountry(String country){
         this.country = country;
     }
 }

@@ -1,7 +1,6 @@
 package com.cart.demo.service.impl;
 
 import com.cart.demo.event.product.FindProductEvent;
-import com.cart.demo.exception.UserAlreadyHasActiveCartException;
 import com.cart.demo.mediator.CartProductMediator;
 import com.cart.demo.mediator.PurchaseCartMediator;
 import com.cart.demo.model.dto.cart.CartProductRequest;
@@ -59,6 +58,12 @@ public class CartServiceImpl implements CartService {
         return generateResponse(cart);
     }
 
+    @Override
+    public void createCart(Long userId){
+        cartRepository.save(new Cart(ACTIVE, userId));
+    }
+
+
     // Used by CartProductMediator
     @Override
     public void findByIdMediator(Long id){
@@ -66,31 +71,6 @@ public class CartServiceImpl implements CartService {
         if (cart == null) {
             throw new ResourceNotFoundException("Cart not found");
         }
-    }
-
-
-    // Used by PurchaseCartMediator
-    @Override
-    public void findByIdMediatorPurchase(Long cartId, int listIndex){
-        Cart cart = cartRepository.findById(cartId).orElse(null);
-        if (cart == null) {
-            throw new ResourceNotFoundException("Cart not found");
-        }
-
-        if (listIndex < cart.getProducts().size()){
-            CartProductQuantity productQuantity = cart.getProducts().get(listIndex);
-
-            cartProductMediator.findProductInfoById(productQuantity.getProductId());
-            purchaseCartMediator.returnCartInfoById(
-                    productQuantity.getId(),
-                    productInfo.getName(),
-                    productInfo.getPrice(),
-                    productQuantity.getQuantity()
-            );
-        }else{
-            purchaseCartMediator.returnCartInfoById((long)-1, "", 0, 0);
-        }
-
     }
 
 
@@ -111,6 +91,7 @@ public class CartServiceImpl implements CartService {
 
         return generateResponse(cart);
     }
+
 
     @Override
     public CartResponse updateProduct(Long userId, CartProductRequest request){
@@ -186,6 +167,41 @@ public class CartServiceImpl implements CartService {
         createActiveCart(cart.getUserId());
     }
 
+
+    // Used by PurchaseCartMediator
+    @Override
+    public void findUserId(Long id){
+        Cart cart = cartRepository.findById(id).orElse(null);
+        if (cart == null){
+            throw new ResourceNotFoundException("Cart not found");
+        }
+        purchaseCartMediator.returnUserId(cart.getUserId());
+    }
+
+    // Used by PurchaseCartMediator
+    @Override
+    public void findByIdMediatorPurchase(Long cartId, int listIndex){
+        Cart cart = cartRepository.findById(cartId).orElse(null);
+        if (cart == null) {
+            throw new ResourceNotFoundException("Cart not found");
+        }
+
+        if (listIndex < cart.getProducts().size()){
+            CartProductQuantity productQuantity = cart.getProducts().get(listIndex);
+
+            cartProductMediator.findProductInfoById(productQuantity.getProductId());
+            purchaseCartMediator.returnCartProductInfoById(
+                    productQuantity.getId(),
+                    productInfo.getName(),
+                    productInfo.getPrice(),
+                    productQuantity.getQuantity()
+            );
+        }else{
+            purchaseCartMediator.returnCartProductInfoById((long)-1, "", 0, 0);
+        }
+    }
+
+
     private CartResponse generateResponse(Cart cart){
         List<CartProductQuantityResponse> productResponseList = new ArrayList<>();
         float totalPrice = 0;
@@ -204,14 +220,9 @@ public class CartServiceImpl implements CartService {
     }
 
     private void createActiveCart(Long userId){
-        Cart cart = cartRepository.findByUserIdAndStatus(userId, ACTIVE);
+        Cart cart = new Cart(ACTIVE, userId);
+        cartRepository.save(cart);
 
-        if (cart == null){
-            cart = new Cart(ACTIVE, userId);
-            cartRepository.save(cart);
-        }else{
-            throw new UserAlreadyHasActiveCartException();
-        }
     }
 
 }

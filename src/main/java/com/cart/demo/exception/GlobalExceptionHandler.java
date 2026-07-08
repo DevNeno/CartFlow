@@ -1,6 +1,5 @@
 package com.cart.demo.exception;
 
-
 import com.cart.demo.model.payload.ApiResponse;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -9,18 +8,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
-public class GlobalHandlerException {
+public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ApiResponse> resourceNotFound(ResourceNotFoundException ex) {
+    public ResponseEntity<ApiResponse> handlerResourceNotFoundException(ResourceNotFoundException ex) {
         ApiResponse apiResponse = new ApiResponse(ex.getMessage());
         return new ResponseEntity<>(apiResponse, HttpStatus.NOT_FOUND);
     }
-
-    @ExceptionHandler(CartAlreadyClosedException.class)
-    public ResponseEntity<ApiResponse>  cartAlreadyClosed() {
-        ApiResponse apiResponse = new ApiResponse("Cart is already closed");
-        return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
-    }
-
 }

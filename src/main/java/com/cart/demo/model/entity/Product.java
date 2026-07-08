@@ -28,7 +28,7 @@ public class Product {
     @Enumerated(EnumType.STRING)
     private Category category;
 
-    private List<Long> purchaseIdList = new ArrayList<>();
+    private final List<Long> purchaseIdList = new ArrayList<>();
 
     public Product(String name, String description, float price, Category category) {
         this.name = name;

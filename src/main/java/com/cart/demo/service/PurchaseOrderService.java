@@ -7,4 +7,7 @@ public interface PurchaseOrderService {
     PurchaseOrderResponse purchase(Long cartId);
     void addProductInfo(Long id, String name, float price, int quantity);
 
+
+    // Mediator PurchaseCartMediator
+    void addUserId(Long userId);
 }

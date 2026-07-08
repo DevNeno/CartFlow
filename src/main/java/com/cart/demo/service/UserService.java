@@ -12,4 +12,7 @@ public interface UserService {
     UserResponse save(UserSaveRequest request);
     UserResponse update(Long id, UserUpdateRequest request);
     void deleteById(Long id);
+
+    // Events
+    void linkPurchaseToUser(Long id, Long purchaseId);
 }

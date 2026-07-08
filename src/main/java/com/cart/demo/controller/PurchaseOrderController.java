@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(path = "/api/order")
+@RequestMapping(path = "/api/purchase")
 public class PurchaseOrderController {
 
     @Autowired
@@ -19,7 +19,7 @@ public class PurchaseOrderController {
         return new ResponseEntity<>(purchaseOrderService.findById(id), HttpStatus.OK);
     }
 
-    @PostMapping("/{cartId}")
+    @PostMapping("/cart/{cartId}")
     public ResponseEntity<PurchaseOrderResponse> purchaseCart(@PathVariable Long cartId) {
         return new ResponseEntity<>(purchaseOrderService.purchase(cartId), HttpStatus.CREATED);
     }

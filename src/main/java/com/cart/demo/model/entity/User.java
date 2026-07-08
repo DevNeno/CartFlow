@@ -26,8 +26,7 @@ public class User {
     @JoinColumn(name = "IdUserInfo")
     private UserInfo userInfo;
 
-    @OneToMany(mappedBy = "user")
-    private List<PurchaseOrder> purchaseOrders = new ArrayList<>();
+    private final List<Long> purchaseOrdersId = new ArrayList<>();
 
     public User(String username, String password, UserInfo userInfo) {
         this.username = username;

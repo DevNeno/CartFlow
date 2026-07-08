@@ -20,6 +20,7 @@ public class Cart {
     private Long id;
 
     @Setter
+    @Enumerated(EnumType.STRING)
     private CartStatus status;
 
     @OneToMany(mappedBy = "cart")

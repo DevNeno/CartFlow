@@ -81,6 +81,7 @@ public class UserServiceImpl  implements UserService {
                 request.password(),
                 userInfo
         );
+        userInfo.setUser(user);
         User savedUser = userRepository.save(user);
         UserInfoResponse userInfoResponse = new UserInfoResponse(
                 savedUser.getUserInfo().getId(),
@@ -143,5 +144,17 @@ public class UserServiceImpl  implements UserService {
             throw new ResourceNotFoundException("User not found");
         }
         userRepository.deleteById(id);
+    }
+
+
+    // Used by linkPurchaseToUserListener
+    @Override
+    public void linkPurchaseToUser(Long id, Long purchaseId) {
+        User user = userRepository.findById(id).orElse(null);
+        if (user == null){
+            throw new ResourceNotFoundException("User not found");
+        }
+        user.getPurchaseOrdersId().add(purchaseId);
+        userRepository.save(user);
     }
 }
