@@ -3,6 +3,7 @@ package com.cart.demo.service.impl;
 import com.cart.demo.event.purchaseOrder.ArchiveCartEvent;
 import com.cart.demo.event.purchaseOrder.LinkPurchaseToUserEvent;
 import com.cart.demo.mediator.PurchaseCartMediator;
+import com.cart.demo.mediator.PurchaseProductMediator;
 import com.cart.demo.model.dto.purchase.PurchaseOrderProductResponse;
 import com.cart.demo.model.dto.purchase.PurchaseOrderResponse;
 import com.cart.demo.model.entity.PurchaseOrder;
@@ -23,6 +24,7 @@ import java.util.List;
 @Service
 public class PurchaseOrderImpl implements PurchaseOrderService {
 
+    private final PurchaseProductMediator purchaseProductMediator;
     private final PurchaseCartMediator purchaseCartMediator;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -32,7 +34,8 @@ public class PurchaseOrderImpl implements PurchaseOrderService {
     private PurchaseProductInfo productInfo = new PurchaseProductInfo();
     private Long userId = (long) -1;
 
-    public PurchaseOrderImpl(@Lazy PurchaseCartMediator purchaseCartMediator, ApplicationEventPublisher eventPublisher, PurchaseOrderRepository purchaseOrderRepository, PurchaseOrderProductRepository purchaseOrderProductRepository){
+    public PurchaseOrderImpl(@Lazy PurchaseProductMediator purchaseProductMediator, @Lazy PurchaseCartMediator purchaseCartMediator, ApplicationEventPublisher eventPublisher, PurchaseOrderRepository purchaseOrderRepository, PurchaseOrderProductRepository purchaseOrderProductRepository){
+        this.purchaseProductMediator = purchaseProductMediator;
         this.purchaseCartMediator = purchaseCartMediator;
         this.eventPublisher = eventPublisher;
         this.purchaseOrderRepository = purchaseOrderRepository;
@@ -90,6 +93,7 @@ public class PurchaseOrderImpl implements PurchaseOrderService {
                     productInfo.getPrice(),
                     productInfo.getQuantity()
             );
+            purchaseProductMediator.deductStock(productInfo.getId(), productInfo.getQuantity());
             eventPublisher.publishEvent(new LinkPurchaseToUserEvent(userId, productInfo.getId()));
             responseProducts.add(purchaseOrderProductResponse);
             listIndex++;

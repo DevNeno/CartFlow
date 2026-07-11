@@ -6,6 +6,7 @@ public record ProductUpdateRequest(
         String name,
         String description,
         float price,
+        int stock,
         Category category
 ) {
 }

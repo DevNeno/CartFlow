@@ -15,4 +15,5 @@ public interface ProductService {
     ProductResponse update(Long id, ProductUpdateRequest request);
     void deleteById(Long id);
     ProductSummaryDTO getProductSummary(Long id);
+    void deductStock(Long productId,  int quantity);
 }

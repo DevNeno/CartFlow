@@ -25,15 +25,19 @@ public class Product {
     private float price;
 
     @Setter
+    private int stock;
+
+    @Setter
     @Enumerated(EnumType.STRING)
     private Category category;
 
     private final List<Long> purchaseIdList = new ArrayList<>();
 
-    public Product(String name, String description, float price, Category category) {
+    public Product(String name, String description, float price, int stock, Category category) {
         this.name = name;
         this.description = description;
         this.price = price;
+        this.stock = stock;
         this.category = category;
     }
 }

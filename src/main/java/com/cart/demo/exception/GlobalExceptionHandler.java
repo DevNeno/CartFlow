@@ -21,4 +21,10 @@ public class GlobalExceptionHandler {
         ApiResponse apiResponse = new ApiResponse("Cart already closed");
         return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(InsufficientStockException.class)
+    public ResponseEntity<ApiResponse> handlerInsufficientStockException() {
+        ApiResponse apiResponse = new ApiResponse("Insufficient stock");
+        return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+    }
 }

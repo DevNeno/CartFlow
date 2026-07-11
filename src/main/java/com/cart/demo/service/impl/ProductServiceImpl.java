@@ -1,5 +1,6 @@
 package com.cart.demo.service.impl;
 
+import com.cart.demo.exception.InsufficientStockException;
 import com.cart.demo.mediator.CartProductMediator;
 import com.cart.demo.model.dto.mediator.ProductSummaryDTO;
 import com.cart.demo.model.dto.product.ProductResponse;
@@ -36,6 +37,7 @@ public class ProductServiceImpl implements ProductService {
                     product.getName(),
                     product.getDescription(),
                     product.getPrice(),
+                    product.getStock(),
                     product.getCategory()
             );
             productResponses.add(productResponse);
@@ -54,6 +56,7 @@ public class ProductServiceImpl implements ProductService {
                 product.getName(),
                 product.getDescription(),
                 product.getPrice(),
+                product.getStock(),
                 product.getCategory()
         );
     }
@@ -73,6 +76,7 @@ public class ProductServiceImpl implements ProductService {
                 request.name(),
                 request.description(),
                 request.price(),
+                request.stock(),
                 request.category()
         );
 
@@ -83,6 +87,7 @@ public class ProductServiceImpl implements ProductService {
                 savedProduct.getName(),
                 savedProduct.getDescription(),
                 savedProduct.getPrice(),
+                savedProduct.getStock(),
                 savedProduct.getCategory()
         );
     }
@@ -102,6 +107,9 @@ public class ProductServiceImpl implements ProductService {
         if (request.price() > 0){
             product.setPrice(request.price());
         }
+        if ( request.stock() > 0 ) {
+            product.setStock(request.stock());
+        }
         if ( request.category() != null){
             product.setCategory(request.category());
         }
@@ -112,6 +120,7 @@ public class ProductServiceImpl implements ProductService {
                 productUpdated.getName(),
                 productUpdated.getDescription(),
                 productUpdated.getPrice(),
+                productUpdated.getStock(),
                 productUpdated.getCategory()
         );
     }
@@ -131,6 +140,22 @@ public class ProductServiceImpl implements ProductService {
             throw new ResourceNotFoundException("Product not found");
         }
         return new ProductSummaryDTO(product.getId(), product.getName(), product.getPrice());
+    }
+
+
+    // Used by PurchaseProductMediator
+    @Override
+    public void deductStock(Long productId, int quantity){
+        Product product = productRepository.findById(productId).orElse(null);
+        if (product == null) {
+            throw new ResourceNotFoundException("Product not found");
+        }
+        if (quantity > product.getStock()){
+            throw new InsufficientStockException();
+        }
+
+        product.setStock(product.getStock() - quantity);
+        productRepository.save(product);
     }
 
 }

@@ -12,6 +12,8 @@ public record ProductSaveRequest(
         String description,
         @Positive
         float price,
+        @Positive
+        int stock,
         @NotNull
         Category category
 ) {}

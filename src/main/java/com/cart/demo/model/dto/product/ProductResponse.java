@@ -7,5 +7,6 @@ public record ProductResponse(
         String name,
         String description,
         float price,
+        int stock,
         Category category
 ){}
