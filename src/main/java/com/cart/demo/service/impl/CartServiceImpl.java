@@ -194,7 +194,7 @@ public class CartServiceImpl implements CartService {
 
             cartProductMediator.findProductInfoById(productQuantity.getProductId());
             purchaseCartMediator.returnCartProductInfoById(
-                    productQuantity.getId(),
+                    productQuantity.getProductId(),
                     productInfo.getName(),
                     productInfo.getPrice(),
                     productQuantity.getQuantity()

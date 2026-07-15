@@ -64,11 +64,11 @@ public class PurchaseOrderImpl implements PurchaseOrderService {
     @Override
     @Transactional
     public PurchaseOrderResponse purchase(Long userId) {
-        PurchaseOrder purchase = purchaseOrderRepository.save(new PurchaseOrder());
 
         List<PurchaseProductQuantity> products = new ArrayList<>();
         List<PurchaseOrderProductResponse> responseProducts = new ArrayList<>();
         purchaseCartMediator.getCartIdByUserId(userId);
+        PurchaseOrder purchase = purchaseOrderRepository.save(new PurchaseOrder());
 
         float totalPrice = 0;
         int listIndex = 0;
