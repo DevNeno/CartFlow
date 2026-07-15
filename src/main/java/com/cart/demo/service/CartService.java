@@ -14,7 +14,7 @@ public interface CartService {
     void archiveCart(Long id);
 
     // Mediator PurchaseCartMediator
-    void findUserId(Long id);
+    void findByUserId(Long userId);
     void findByIdMediatorPurchase(Long id, int listIndex);
 
     // Mediator CartProductMediator

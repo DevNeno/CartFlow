@@ -32,7 +32,7 @@ public class PurchaseOrderImpl implements PurchaseOrderService {
     private final PurchaseOrderProductRepository purchaseOrderProductRepository;
 
     private PurchaseProductInfo productInfo = new PurchaseProductInfo();
-    private Long userId = (long) -1;
+    private Long cartId = (long) -1;
 
     public PurchaseOrderImpl(@Lazy PurchaseProductMediator purchaseProductMediator, @Lazy PurchaseCartMediator purchaseCartMediator, ApplicationEventPublisher eventPublisher, PurchaseOrderRepository purchaseOrderRepository, PurchaseOrderProductRepository purchaseOrderProductRepository){
         this.purchaseProductMediator = purchaseProductMediator;
@@ -63,12 +63,12 @@ public class PurchaseOrderImpl implements PurchaseOrderService {
 
     @Override
     @Transactional
-    public PurchaseOrderResponse purchase(Long cartId) {
+    public PurchaseOrderResponse purchase(Long userId) {
         PurchaseOrder purchase = purchaseOrderRepository.save(new PurchaseOrder());
 
         List<PurchaseProductQuantity> products = new ArrayList<>();
         List<PurchaseOrderProductResponse> responseProducts = new ArrayList<>();
-        purchaseCartMediator.getUserIdByCartId(cartId);
+        purchaseCartMediator.getCartIdByUserId(userId);
 
         float totalPrice = 0;
         int listIndex = 0;
@@ -116,8 +116,8 @@ public class PurchaseOrderImpl implements PurchaseOrderService {
     }
 
     // Mediator PurchaseCartMediator
-    public void addUserId(Long userId){
-        this.userId = userId;
+    public void addCartId(Long cartId){
+        this.cartId = cartId;
     }
 
 }

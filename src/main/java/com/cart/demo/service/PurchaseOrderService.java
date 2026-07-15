@@ -9,5 +9,5 @@ public interface PurchaseOrderService {
 
 
     // Mediator PurchaseCartMediator
-    void addUserId(Long userId);
+     void addCartId(Long cartId);
 }

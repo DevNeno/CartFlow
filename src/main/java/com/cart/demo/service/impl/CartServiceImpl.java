@@ -170,12 +170,12 @@ public class CartServiceImpl implements CartService {
 
     // Used by PurchaseCartMediator
     @Override
-    public void findUserId(Long id){
-        Cart cart = cartRepository.findById(id).orElse(null);
+    public void findByUserId(Long userId){
+        Cart cart = cartRepository.findByUserIdAndStatus(userId, ACTIVE);
         if (cart == null){
             throw new ResourceNotFoundException("Cart not found");
         }
-        purchaseCartMediator.returnUserId(cart.getUserId());
+        purchaseCartMediator.returnCartId(cart.getId());
     }
 
     // Used by PurchaseCartMediator

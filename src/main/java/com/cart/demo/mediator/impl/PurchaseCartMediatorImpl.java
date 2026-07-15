@@ -3,7 +3,6 @@ package com.cart.demo.mediator.impl;
 import com.cart.demo.mediator.PurchaseCartMediator;
 import com.cart.demo.service.CartService;
 import com.cart.demo.service.PurchaseOrderService;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,13 +17,13 @@ public class PurchaseCartMediatorImpl implements PurchaseCartMediator {
     }
 
     @Override
-    public void getUserIdByCartId(Long cartId) {
-        cartService.findUserId(cartId);
+    public void getCartIdByUserId(Long userId) {
+        cartService.findByUserId(userId);
     }
 
     @Override
-    public void returnUserId(Long userId){
-        purchaseOrderService.addUserId(userId);
+    public void returnCartId(Long cartId){
+        purchaseOrderService.addCartId(cartId);
     }
 
     @Override

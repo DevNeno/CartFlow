@@ -19,9 +19,9 @@ public class PurchaseOrderController {
         return new ResponseEntity<>(purchaseOrderService.findById(id), HttpStatus.OK);
     }
 
-    @PostMapping("/cart/{cartId}")
-    public ResponseEntity<PurchaseOrderResponse> purchaseCart(@PathVariable Long cartId) {
-        return new ResponseEntity<>(purchaseOrderService.purchase(cartId), HttpStatus.CREATED);
+    @PostMapping("/user/{userId}")
+    public ResponseEntity<PurchaseOrderResponse> purchaseCart(@PathVariable Long userId) {
+        return new ResponseEntity<>(purchaseOrderService.purchase(userId), HttpStatus.CREATED);
     }
 
 }
